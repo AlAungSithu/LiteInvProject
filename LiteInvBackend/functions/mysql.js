@@ -1,4 +1,3 @@
-const functions = require('firebase-functions');
 const mysql = require('mysql');
 const con = mysql.createConnection({
     host: 'liteinv.cwbgzf4cyva5.us-east-2.rds.amazonaws.com',

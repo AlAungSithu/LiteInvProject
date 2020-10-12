@@ -1,8 +1,11 @@
 const functions = require('firebase-functions');
-const express = require('express');
-const cors = require('cors');
+// const express = require('express');
+// const cors = require('cors');
+const mysql = require('mysql');
+// const { extractInstanceAndPath } = require('firebase-functions/lib/providers/database');
+var admin = require('firebase-admin');
 const con = require('./mysql')
-
+admin.initializeApp();
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -11,8 +14,6 @@ const con = require('./mysql')
 //   functions.logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
-
-
 
 // SELLER FUNCTIONS
 exports.create_seller = functions.https.onRequest(async (request, response) => {
@@ -107,6 +108,13 @@ exports.delete_seller = functions.https.onRequest(async (request, response) => {
         "Success": true/false
     */
     let id = request.body.seller_id;
+    
+    if (!id) {
+        res = [];
+        res.push({Success: false})
+        response.send(res);
+    }
+    
     con.query(`DELETE FROM Seller WHERE SellerId = ${id}`, (err, rows, fields) => {
         affectedRows = rows.affectedRows;
         if (!err) {
@@ -120,6 +128,7 @@ exports.delete_seller = functions.https.onRequest(async (request, response) => {
         }
         else
             res.push({Success: false})
+            response.send(res);
     })
 });
 
