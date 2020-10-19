@@ -153,17 +153,19 @@ export default function CustomTable(props) {
               alert("Please input name and email");
               return;
             }
-            let result = await axios(updateUrl, {
-              params: {
-                [`${type.toLowerCase()}_id`]: id,
-                [`${type.toLowerCase()}_name`]: newName,
-                [`${type.toLowerCase()}_email`]: newEmail,
-              }
-            });
-            if (result.status === 200) {
-              alert(`${type} ${name} (Id: ${id}, Email: ${email}) is succesfully updated`)
-              history.go(0);
-            } else {
+            try {
+              let result = await axios(updateUrl, {
+                params: {
+                  [`${type.toLowerCase()}_id`]: id,
+                  [`${type.toLowerCase()}_name`]: newName,
+                  [`${type.toLowerCase()}_email`]: newEmail,
+                }
+              });
+              if (result.status === 200) {
+                alert(`${type} ${name} (Id: ${id}, Email: ${email}) is succesfully updated`)
+                history.go(0);
+              } 
+            } catch {
               alert("Update fail");
             }
           }}
