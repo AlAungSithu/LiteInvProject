@@ -86,7 +86,6 @@ exports.update_seller = functions.https.onRequest(async (request, response) => {
         let new_name = request.query.seller_name;
         let new_email = request.query.seller_email;
         let sql;
-        res = [];
         if (new_name && new_email) {
             sql = `UPDATE Seller SET SellerName = "${new_name}", SellerEmail = "${new_email}" WHERE SellerId = "${id}";`
         } else if (new_name) {
@@ -94,20 +93,15 @@ exports.update_seller = functions.https.onRequest(async (request, response) => {
         } else if (new_email) {
             sql = `UPDATE Seller SET SellerEmail = "${new_email}" WHERE SellerId = "${id}";`
         } else {
-            // Neither input
-            res.push({Success: false})
-            response.send(res);
+            // Neither input - Should never happen
+            response.status(400).send(err);
         }
 
         con.query(sql, (err, rows, fields) => {
             if (!err) {
-                res = [];
-                res.push({Success: true})
-                response.send(res);
+                response.sendStatus(200);
             } else {
-                res = [];
-                res.push({Success: false})
-                response.send(res);
+                response.status(400).send(err);
             }
         })
 
@@ -219,7 +213,6 @@ exports.update_employee = functions.https.onRequest(async (request, response) =>
         let new_name = request.query.employee_name;
         let new_email = request.query.employee_email;
         let sql;
-        res = [];
         if (new_name && new_email) {
             sql = `UPDATE Employee SET EmployeeName = "${new_name}", EmployeeEmail = "${new_email}" WHERE EmployeeId = "${id}";`
         } else if (new_name) {
@@ -228,19 +221,14 @@ exports.update_employee = functions.https.onRequest(async (request, response) =>
             sql = `UPDATE Employee SET EmployeeEmail = "${new_email}" WHERE EmployeeId = "${id}";`
         } else {
             // Neither input
-            res.push({Success: false})
-            response.send(res);
+            response.status(400).send(err);
         }
 
         con.query(sql, (err, rows, fields) => {
             if (!err) {
-                res = [];
-                res.push({Success: true})
-                response.send(res);
+                response.sendStatus(200);
             } else {
-                res = [];
-                res.push({Success: false})
-                response.send(res);
+                response.status(400).send(err);
             }
         })
 
@@ -350,7 +338,6 @@ exports.update_customer = functions.https.onRequest(async (request, response) =>
         let new_name = request.query.customer_name;
         let new_email = request.query.customer_email;
         let sql;
-        res = [];
         if (new_name && new_email) {
             sql = `UPDATE Customer SET CustomerName = "${new_name}", CustomerEmail = "${new_email}" WHERE CustomerId = "${id}";`
         } else if (new_name) {
@@ -359,19 +346,14 @@ exports.update_customer = functions.https.onRequest(async (request, response) =>
             sql = `UPDATE Customer SET CustomerEmail = "${new_email}" WHERE CustomerId = "${id}";`
         } else {
             // Neither input
-            res.push({Success: false})
-            response.send(res);
+            response.status(400).send(err);
         }
 
         con.query(sql, (err, rows, fields) => {
             if (!err) {
-                res = [];
-                res.push({Success: true})
-                response.send(res);
+                response.sendStatus(200);
             } else {
-                res = [];
-                res.push({Success: false})
-                response.send(res);
+                response.status(400).send(err);
             }
         })
 
