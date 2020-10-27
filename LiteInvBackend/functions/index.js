@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
+exports.inventory = require('./inventory');
 // const express = require('express');
 const cors = require('cors')({origin: true});
-const mysql = require('mysql');
 // const { extractInstanceAndPath } = require('firebase-functions/lib/providers/database');
 var admin = require('firebase-admin');
 const con = require('./mysql')
