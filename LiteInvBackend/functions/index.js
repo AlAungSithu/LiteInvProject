@@ -19,23 +19,16 @@ admin.initializeApp();
 exports.create_seller = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
     
-        /* FORMAT
-            "Success": true/false,
-            "SellerId": inserted id     OR      -1 on Success == false,
-            "SellerName": "name sent to backend",
-            "SellerEmail": "email sent to backend"
-        */
         let name = request.query.seller_name;
         let email = request.query.seller_email;
         res = [];
 
         con.query(`INSERT INTO Seller (SellerName, SellerEmail) VALUES ("${name}", "${email}");`, (err, rows, fields) => {
             if (!err) {
-                res.push({Success: true, SellerId: rows.insertId, SellerName: name, SellerEmail: email});
-                response.send(res);
+                res.push({ SellerId: rows.insertId, SellerName: name, SellerEmail: email });
+                response.status(201).send(res);
             } else {
-                res.push({Success: false, SellerId: -1, SellerName: name, SellerEmail: email});
-                response.send(res);
+                response.status(400).send(err);
             }
         })
 
@@ -45,30 +38,22 @@ exports.create_seller = functions.https.onRequest(async (request, response) => {
 exports.retrieve_seller = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
     
-        /* FORMAT
-            ON SUCCESS - person with that id found
-                "SellerId": retrieved-id,
-                "SellerName": "retrieved-name",
-                "SellerEmail": "retrieved-email"
-            ON FAILURE - no person with that id found
-                Blank
-        */
         let id = request.query.seller_id;
         if (id) {
             // ID Passed, Return Specific
             con.query(`SELECT * FROM Seller WHERE SellerId = ${id}`, (err, rows, fields) => {
                 if (!err)
-                    response.send(rows);
+                    response.status(200).send(rows);
                 else
-                    response.send();
+                    response.status(400).send(err);
             })
         } else {
             // No ID Passed, Return All
             con.query('SELECT * FROM Seller', (err, rows, fields) => {
                 if (!err)
-                    response.send(rows);
+                    response.status(200).send(rows);
                 else
-                    response.send();
+                    response.status(400).send(err);
             })
         }
 
@@ -79,9 +64,6 @@ exports.retrieve_seller = functions.https.onRequest(async (request, response) =>
 exports.update_seller = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
 
-        /* FORMAT
-            "Success": true/false
-        */
         let id = request.query.seller_id;
         let new_name = request.query.seller_name;
         let new_email = request.query.seller_email;
@@ -112,31 +94,14 @@ exports.update_seller = functions.https.onRequest(async (request, response) => {
 exports.delete_seller = functions.https.onRequest(async (request, response) => {
     
     cors(request, response, () => {
-        /* FORMAT
-            "Success": true/false
-        */
         let id = request.query.seller_id;
         
-        if (!id) {
-            res = [];
-            res.push({Success: false})
-            response.send(res);
-        }
-        
         con.query(`DELETE FROM Seller WHERE SellerId = ${id}`, (err, rows, fields) => {
-            affectedRows = rows.affectedRows;
             if (!err) {
-                res = [];
-                if (affectedRows) {
-                    res.push({Success: true})
-                } else {
-                    res.push({Success: false})
-                }
-                response.send(res);
+                response.sendStatus(200);
+            } else {
+                response.status(400).send(err);
             }
-            else
-                res.push({Success: false})
-                response.send(res);
         })
     })
     
@@ -147,23 +112,16 @@ exports.delete_seller = functions.https.onRequest(async (request, response) => {
 exports.create_employee = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
     
-        /* FORMAT
-            "Success": true/false,
-            "EmployeeId": inserted id     OR      -1 on Success == false,
-            "EmployeeName": "name sent to backend",
-            "EmployeeEmail": "email sent to backend"
-        */
         let name = request.query.employee_name;
         let email = request.query.employee_email;
         res = [];
 
         con.query(`INSERT INTO Employee (EmployeeName, EmployeeEmail) VALUES ("${name}", "${email}");`, (err, rows, fields) => {
             if (!err) {
-                res.push({Success: true, EmployeeId: rows.insertId, EmployeeName: name, EmployeeEmail: email});
-                response.send(res);
+                res.push({ EmployeeId: rows.insertId, EmployeeName: name, EmployeeEmail: email });
+                response.status(201).send(res);
             } else {
-                res.push({Success: false, EmployeeId: -1, EmployeeName: name, EmployeeEmail: email});
-                response.send(res);
+                response.status(400).send(err);
             }
         })
 
@@ -173,30 +131,22 @@ exports.create_employee = functions.https.onRequest(async (request, response) =>
 exports.retrieve_employee = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
     
-        /* FORMAT
-            ON SUCCESS - person with that id found
-                "EmployeeId": retrieved-id,
-                "EmplyeeName": "retrieved-name",
-                "EmployeeEmail": "retrieved-email"
-            ON FAILURE - no person with that id found
-                Blank
-        */
         let id = request.query.employee_id;
         if (id) {
             // ID Passed, Return Specific
             con.query(`SELECT * FROM Employee WHERE EmployeeId = ${id}`, (err, rows, fields) => {
                 if (!err)
-                    response.send(rows);
+                    response.status(200).send(rows);
                 else
-                    response.send();
+                    response.status(400).send(err);
             })
         } else {
             // No ID Passed, Return All
             con.query('SELECT * FROM Employee', (err, rows, fields) => {
                 if (!err)
-                    response.send(rows);
+                    response.status(200).send(rows);
                 else
-                    response.send();
+                    response.status(400).send(err);
             })
         }
 
@@ -206,9 +156,6 @@ exports.retrieve_employee = functions.https.onRequest(async (request, response) 
 exports.update_employee = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
 
-        /* FORMAT
-            "Success": true/false
-        */
         let id = request.query.employee_id;
         let new_name = request.query.employee_name;
         let new_email = request.query.employee_email;
@@ -237,10 +184,7 @@ exports.update_employee = functions.https.onRequest(async (request, response) =>
 
 exports.delete_employee = functions.https.onRequest(async (request, response) => {
     
-    cors(request, response, () => {
-        /* FORMAT
-            "Success": true/false
-        */
+    cors(request, response, () => {    
         let id = request.query.employee_id;
         
         if (!id) {
@@ -250,19 +194,11 @@ exports.delete_employee = functions.https.onRequest(async (request, response) =>
         }
         
         con.query(`DELETE FROM Employee WHERE EmployeeId = ${id}`, (err, rows, fields) => {
-            affectedRows = rows.affectedRows;
             if (!err) {
-                res = [];
-                if (affectedRows) {
-                    res.push({Success: true})
-                } else {
-                    res.push({Success: false})
-                }
-                response.send(res);
+                response.sendStatus(200);
+            } else {
+                response.status(400).send(err);
             }
-            else
-                res.push({Success: false})
-                response.send(res);
         })
     })
     
@@ -272,23 +208,16 @@ exports.delete_employee = functions.https.onRequest(async (request, response) =>
 exports.create_customer = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
     
-        /* FORMAT
-            "Success": true/false,
-            "CustomerId": inserted id     OR      -1 on Success == false,
-            "CustomerName": "name sent to backend",
-            "CustomerEmail": "email sent to backend"
-        */
         let name = request.query.customer_name;
         let email = request.query.customer_email;
         res = [];
 
         con.query(`INSERT INTO Customer (CustomerName, CustomerEmail) VALUES ("${name}", "${email}");`, (err, rows, fields) => {
             if (!err) {
-                res.push({Success: true, CustomerId: rows.insertId, CustomerName: name, CustomerEmail: email});
-                response.send(res);
+                res.push({ CustomerId: rows.insertId, CustomerName: name, CustomerEmail: email });
+                response.status(201).send(res);
             } else {
-                res.push({Success: false, CustomerId: -1, CustomerName: name, CustomerEmail: email});
-                response.send(res);
+                response.status(400).send(err);
             }
         })
 
@@ -298,30 +227,22 @@ exports.create_customer = functions.https.onRequest(async (request, response) =>
 exports.retrieve_customer = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
     
-        /* FORMAT
-            ON SUCCESS - person with that id found
-                "CustomerId": retrieved-id,
-                "CustomerName": "retrieved-name",
-                "CustomerEmail": "retrieved-email"
-            ON FAILURE - no person with that id found
-                Blank
-        */
         let id = request.query.customer_id;
         if (id) {
             // ID Passed, Return Specific
             con.query(`SELECT * FROM Customer WHERE CustomerId = ${id}`, (err, rows, fields) => {
                 if (!err)
-                    response.send(rows);
+                    response.status(200).send(rows);
                 else
-                    response.send();
+                    response.status(400).send(err);
             })
         } else {
             // No ID Passed, Return All
             con.query('SELECT * FROM Customer', (err, rows, fields) => {
                 if (!err)
-                    response.send(rows);
+                    response.status(200).send(rows);
                 else
-                    response.send();
+                    response.status(400).send(err);
             })
         }
 
@@ -331,9 +252,6 @@ exports.retrieve_customer = functions.https.onRequest(async (request, response) 
 exports.update_customer = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
 
-        /* FORMAT
-            "Success": true/false
-        */
         let id = request.query.customer_id;
         let new_name = request.query.customer_name;
         let new_email = request.query.customer_email;
@@ -363,9 +281,6 @@ exports.update_customer = functions.https.onRequest(async (request, response) =>
 exports.delete_customer = functions.https.onRequest(async (request, response) => {
     
     cors(request, response, () => {
-        /* FORMAT
-            "Success": true/false
-        */
         let id = request.query.customer_id;
         
         if (!id) {
@@ -375,19 +290,11 @@ exports.delete_customer = functions.https.onRequest(async (request, response) =>
         }
         
         con.query(`DELETE FROM Customer WHERE CustomerId = ${id}`, (err, rows, fields) => {
-            affectedRows = rows.affectedRows;
             if (!err) {
-                res = [];
-                if (affectedRows) {
-                    res.push({Success: true})
-                } else {
-                    res.push({Success: false})
-                }
-                response.send(res);
+                response.sendStatus(200);
+            } else {
+                response.status(400).send(err);
             }
-            else
-                res.push({Success: false})
-                response.send(res);
         })
     })
     

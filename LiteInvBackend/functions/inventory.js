@@ -57,8 +57,8 @@ exports.update_item = functions.https.onRequest(async (request, response) => {
 
         con.query(sql, (err, rows, fields) => {
             if (!err) {
-                res.push({ ItemId: id, ItemName: new_name })
-                response.status(200).send(res);
+                //res.push({ ItemId: id, ItemName: new_name })
+                response.sendStatus(200);
             } else {
                 response.status(400).send(err);
             }
