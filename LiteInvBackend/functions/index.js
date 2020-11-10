@@ -25,7 +25,7 @@ exports.create_seller = functions.https.onRequest(async (request, response) => {
 
         con.query(`INSERT INTO Seller (SellerName, SellerEmail) VALUES ("${name}", "${email}");`, (err, rows, fields) => {
             if (!err) {
-                res.push({ SellerId: rows.insertId, SellerName: name, SellerEmail: email });
+                res.push({ "Seller Id": rows.insertId, "Seller Name": name, "Seller Email": email });
                 response.status(201).send(res);
             } else {
                 response.status(400).send(err);
@@ -39,21 +39,31 @@ exports.retrieve_seller = functions.https.onRequest(async (request, response) =>
     cors(request, response, () => {
     
         let id = request.query.seller_id;
+        res = [];
+
         if (id) {
             // ID Passed, Return Specific
             con.query(`SELECT * FROM Seller WHERE SellerId = ${id}`, (err, rows, fields) => {
-                if (!err)
-                    response.status(200).send(rows);
-                else
+                if (!err) {
+                    res.push({ "Seller Id": rows[0].SellerId, "Seller Name": rows[0].SellerName, "Seller Email": rows[0].SellerEmail });
+                    response.status(200).send(res);
+                } else {
                     response.status(400).send(err);
+                }
             })
         } else {
             // No ID Passed, Return All
             con.query('SELECT * FROM Seller', (err, rows, fields) => {
-                if (!err)
-                    response.status(200).send(rows);
-                else
+                if (!err) {
+                    let i = 0;
+                    while (i < rows.length) {
+                        res.push({ "Seller Id": rows[i].SellerId, "Seller Name": rows[i].SellerName, "Seller Email": rows[i].SellerEmail });
+                        i++;
+                    }
+                    response.status(200).send(res);
+                } else {
                     response.status(400).send(err);
+                }
             })
         }
 
@@ -118,7 +128,7 @@ exports.create_employee = functions.https.onRequest(async (request, response) =>
 
         con.query(`INSERT INTO Employee (EmployeeName, EmployeeEmail) VALUES ("${name}", "${email}");`, (err, rows, fields) => {
             if (!err) {
-                res.push({ EmployeeId: rows.insertId, EmployeeName: name, EmployeeEmail: email });
+                res.push({ "Employee Id": rows.insertId, "Employee Name": name, "Employee Email": email });
                 response.status(201).send(res);
             } else {
                 response.status(400).send(err);
@@ -132,21 +142,31 @@ exports.retrieve_employee = functions.https.onRequest(async (request, response) 
     cors(request, response, () => {
     
         let id = request.query.employee_id;
+        res = [];
+
         if (id) {
             // ID Passed, Return Specific
             con.query(`SELECT * FROM Employee WHERE EmployeeId = ${id}`, (err, rows, fields) => {
-                if (!err)
-                    response.status(200).send(rows);
-                else
+                if (!err) {
+                    res.push({ "Employee Id": rows[0].EmployeeId, "Employee Name": rows[0].EmployeeName, "Employee Email": rows[0].EmployeeEmail });
+                    response.status(200).send(res);
+                } else {
                     response.status(400).send(err);
+                }
             })
         } else {
             // No ID Passed, Return All
             con.query('SELECT * FROM Employee', (err, rows, fields) => {
-                if (!err)
-                    response.status(200).send(rows);
-                else
+                if (!err) {
+                    let i = 0;
+                    while (i < rows.length) {
+                        res.push({ "Employee Id": rows[i].EmployeeId, "Employee Name": rows[i].EmployeeName, "Employee Email": rows[i].EmployeeEmail });
+                        i++;
+                    }
+                    response.status(200).send(res);
+                } else {
                     response.status(400).send(err);
+                }
             })
         }
 
@@ -214,7 +234,7 @@ exports.create_customer = functions.https.onRequest(async (request, response) =>
 
         con.query(`INSERT INTO Customer (CustomerName, CustomerEmail) VALUES ("${name}", "${email}");`, (err, rows, fields) => {
             if (!err) {
-                res.push({ CustomerId: rows.insertId, CustomerName: name, CustomerEmail: email });
+                res.push({ "Customer Id": rows.insertId, "Customer Name": name, "Customer Email": email });
                 response.status(201).send(res);
             } else {
                 response.status(400).send(err);
@@ -228,21 +248,31 @@ exports.retrieve_customer = functions.https.onRequest(async (request, response) 
     cors(request, response, () => {
     
         let id = request.query.customer_id;
+        res = [];
+
         if (id) {
             // ID Passed, Return Specific
             con.query(`SELECT * FROM Customer WHERE CustomerId = ${id}`, (err, rows, fields) => {
-                if (!err)
-                    response.status(200).send(rows);
-                else
+                if (!err) {
+                    res.push({ "Customer Id": rows[0].CustomerId, "Customer Name": rows[0].CustomerName, "Customer Email": rows[0].CustomerEmail });
+                    response.status(200).send(res);
+                } else {
                     response.status(400).send(err);
+                }
             })
         } else {
             // No ID Passed, Return All
             con.query('SELECT * FROM Customer', (err, rows, fields) => {
-                if (!err)
-                    response.status(200).send(rows);
-                else
+                if (!err) {
+                    let i = 0;
+                    while (i < rows.length) {
+                        res.push({ "Customer Id": rows[i].CustomerId, "Customer Name": rows[i].CustomerName, "Customer Email": rows[i].CustomerEmail });
+                        i++;
+                    }
+                    response.status(200).send(res);
+                } else {
                     response.status(400).send(err);
+                }
             })
         }
 
