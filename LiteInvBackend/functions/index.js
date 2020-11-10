@@ -39,34 +39,35 @@ exports.retrieve_seller = functions.https.onRequest(async (request, response) =>
     cors(request, response, () => {
     
         let id = request.query.seller_id;
-        res = [];
 
         if (id) {
-            // ID Passed, Return Specific
-            con.query(`SELECT * FROM Seller WHERE SellerId = ${id}`, (err, rows, fields) => {
+            querystring = `SELECT s.SellerId AS "Seller Id", s.SellerName AS "Seller Name", s.SellerEmail AS "Seller Email", COALESCE(COUNT(e.SellerId), 0) AS "Sales to Employees"
+            FROM Seller s LEFT OUTER JOIN EmployeePurchase e 
+            ON e.SellerId = s.SellerId 
+            GROUP BY s.SellerId, s.SellerName, s.SellerEmail
+            HAVING s.SellerId = ${id};`
+            con.query(querystring, (err, rows, fields) => {
                 if (!err) {
-                    res.push({ "Seller Id": rows[0].SellerId, "Seller Name": rows[0].SellerName, "Seller Email": rows[0].SellerEmail });
-                    response.status(200).send(res);
+                    response.status(200).send(rows);
                 } else {
                     response.status(400).send(err);
                 }
             })
+
+        // Retrieve All
         } else {
-            // No ID Passed, Return All
-            con.query('SELECT * FROM Seller', (err, rows, fields) => {
+            querystring = `SELECT s.SellerId AS "Seller Id", s.SellerName AS "Seller Name", s.SellerEmail AS "Seller Email", COALESCE(COUNT(e.SellerId), 0) AS "Sales to Employees"
+            FROM Seller s LEFT OUTER JOIN EmployeePurchase e 
+            ON e.SellerId = s.SellerId 
+            GROUP BY s.SellerId, s.SellerName, s.SellerEmail;`;
+            con.query(querystring, (err, rows, fields) => {
                 if (!err) {
-                    let i = 0;
-                    while (i < rows.length) {
-                        res.push({ "Seller Id": rows[i].SellerId, "Seller Name": rows[i].SellerName, "Seller Email": rows[i].SellerEmail });
-                        i++;
-                    }
-                    response.status(200).send(res);
+                    response.status(200).send(rows);
                 } else {
                     response.status(400).send(err);
                 }
             })
         }
-
     })
 });
 
@@ -142,28 +143,58 @@ exports.retrieve_employee = functions.https.onRequest(async (request, response) 
     cors(request, response, () => {
     
         let id = request.query.employee_id;
-        res = [];
 
         if (id) {
             // ID Passed, Return Specific
-            con.query(`SELECT * FROM Employee WHERE EmployeeId = ${id}`, (err, rows, fields) => {
+            querystring = `SELECT t1.EmployeeId AS "Employee Id", t1.EmployeeName AS "Employee Name", t1.EmployeeEmail AS "Employee Email", t1.Purchases AS "Purchases from Sellers", t2.Sales AS "Sales to Customers", t3.Refunds AS "Refunds Processed"
+            FROM
+            (SELECT e.EmployeeId, e.EmployeeName, e.EmployeeEmail, COALESCE(COUNT(ep.EmployeeId), 0) AS "Purchases"
+            FROM Employee e LEFT OUTER JOIN EmployeePurchase ep 
+            ON e.EmployeeId = ep.EmployeeId
+            GROUP BY e.EmployeeId, e.EmployeeName, e.EmployeeEmail) t1 
+            JOIN
+            (SELECT e.EmployeeId, e.EmployeeName, e.EmployeeEmail, COALESCE(COUNT(co.EmployeeId), 0) AS "Sales"
+            FROM Employee e LEFT OUTER JOIN CustomerOrder co 
+            ON e.EmployeeId = co.EmployeeId
+            GROUP BY e.EmployeeId, e.EmployeeName, e.EmployeeEmail) t2
+            ON t1.EmployeeId = t2.EmployeeId
+            JOIN
+            (SELECT e.EmployeeId, e.EmployeeName, e.EmployeeEmail, COALESCE(COUNT(r.EmployeeId), 0) AS "Refunds"
+            FROM Employee e LEFT OUTER JOIN CustomerRefund r
+            ON e.EmployeeId = r.EmployeeId 
+            GROUP BY e.EmployeeId, e.EmployeeName, e.EmployeeEmail) t3
+            ON t1.EmployeeId = t3.EmployeeId
+            WHERE t1.EmployeeId = ${id};`;
+            con.query(querystring, (err, rows, fields) => {
                 if (!err) {
-                    res.push({ "Employee Id": rows[0].EmployeeId, "Employee Name": rows[0].EmployeeName, "Employee Email": rows[0].EmployeeEmail });
-                    response.status(200).send(res);
+                    response.status(200).send(rows);
                 } else {
                     response.status(400).send(err);
                 }
             })
         } else {
             // No ID Passed, Return All
-            con.query('SELECT * FROM Employee', (err, rows, fields) => {
+            querystring = `SELECT t1.EmployeeId AS "Employee Id", t1.EmployeeName AS "Employee Name", t1.EmployeeEmail AS "Employee Email", t1.Purchases AS "Purchases from Sellers", t2.Sales AS "Sales to Customers", t3.Refunds AS "Refunds Processed"
+            FROM
+            (SELECT e.EmployeeId, e.EmployeeName, e.EmployeeEmail, COALESCE(COUNT(ep.EmployeeId), 0) AS "Purchases"
+            FROM Employee e LEFT OUTER JOIN EmployeePurchase ep 
+            ON e.EmployeeId = ep.EmployeeId
+            GROUP BY e.EmployeeId, e.EmployeeName, e.EmployeeEmail) t1 
+            JOIN
+            (SELECT e.EmployeeId, e.EmployeeName, e.EmployeeEmail, COALESCE(COUNT(co.EmployeeId), 0) AS "Sales"
+            FROM Employee e LEFT OUTER JOIN CustomerOrder co 
+            ON e.EmployeeId = co.EmployeeId
+            GROUP BY e.EmployeeId, e.EmployeeName, e.EmployeeEmail) t2
+            ON t1.EmployeeId = t2.EmployeeId
+            JOIN
+            (SELECT e.EmployeeId, e.EmployeeName, e.EmployeeEmail, COALESCE(COUNT(r.EmployeeId), 0) AS "Refunds"
+            FROM Employee e LEFT OUTER JOIN CustomerRefund r
+            ON e.EmployeeId = r.EmployeeId 
+            GROUP BY e.EmployeeId, e.EmployeeName, e.EmployeeEmail) t3
+            ON t1.EmployeeId = t3.EmployeeId;`;
+            con.query(querystring, (err, rows, fields) => {
                 if (!err) {
-                    let i = 0;
-                    while (i < rows.length) {
-                        res.push({ "Employee Id": rows[i].EmployeeId, "Employee Name": rows[i].EmployeeName, "Employee Email": rows[i].EmployeeEmail });
-                        i++;
-                    }
-                    response.status(200).send(res);
+                    response.status(200).send(rows);
                 } else {
                     response.status(400).send(err);
                 }
@@ -248,28 +279,45 @@ exports.retrieve_customer = functions.https.onRequest(async (request, response) 
     cors(request, response, () => {
     
         let id = request.query.customer_id;
-        res = [];
 
         if (id) {
             // ID Passed, Return Specific
-            con.query(`SELECT * FROM Customer WHERE CustomerId = ${id}`, (err, rows, fields) => {
+            querystring = `SELECT t1.CustomerId AS "Customer Id", t1.CustomerName AS "Customer Name", t1.CustomerEmail AS "Customer Email", t1.Purchases AS "Purchases from Employees", t2.Refunds AS "Refunds Requested"
+            FROM (SELECT c.CustomerId, c.CustomerName, c.CustomerEmail, COALESCE(COUNT(co.CustomerId), 0) AS "Purchases"
+            FROM Customer c LEFT OUTER JOIN CustomerOrder co 
+            ON c.CustomerId = co.CustomerId 
+            GROUP BY c.CustomerId, c.CustomerName, c.CustomerEmail) t1 
+            JOIN
+            (SELECT c.CustomerId, c.CustomerName, c.CustomerEmail, COALESCE(COUNT(r.CustomerId), 0) AS "Refunds"
+            FROM Customer c LEFT OUTER JOIN CustomerRefund r
+            ON c.CustomerId = r.CustomerId 
+            GROUP BY c.CustomerId, c.CustomerName, c.CustomerEmail) t2
+            ON t1.CustomerId = t2.CustomerId
+            WHERE t1.CustomerId = ${id};`
+            con.query(querystring, (err, rows, fields) => {
                 if (!err) {
-                    res.push({ "Customer Id": rows[0].CustomerId, "Customer Name": rows[0].CustomerName, "Customer Email": rows[0].CustomerEmail });
-                    response.status(200).send(res);
+                    response.status(200).send(rows);
                 } else {
                     response.status(400).send(err);
                 }
             })
         } else {
             // No ID Passed, Return All
-            con.query('SELECT * FROM Customer', (err, rows, fields) => {
+            querystring = `SELECT t1.CustomerId AS "Customer Id", t1.CustomerName AS "Customer Name", t1.CustomerEmail AS "Customer Email", t1.Purchases AS "Purchases from Employees", t2.Refunds AS "Refunds Requested"
+            FROM (SELECT c.CustomerId, c.CustomerName, c.CustomerEmail, COALESCE(COUNT(co.CustomerId), 0) AS "Purchases"
+            FROM Customer c LEFT OUTER JOIN CustomerOrder co 
+            ON c.CustomerId = co.CustomerId 
+            GROUP BY c.CustomerId, c.CustomerName, c.CustomerEmail) t1 
+            JOIN
+            (SELECT c.CustomerId, c.CustomerName, c.CustomerEmail, COALESCE(COUNT(r.CustomerId), 0) AS "Refunds"
+            FROM Customer c LEFT OUTER JOIN CustomerRefund r
+            ON c.CustomerId = r.CustomerId 
+            GROUP BY c.CustomerId, c.CustomerName, c.CustomerEmail) t2
+            ON t1.CustomerId = t2.CustomerId;`
+
+            con.query(querystring, (err, rows, fields) => {
                 if (!err) {
-                    let i = 0;
-                    while (i < rows.length) {
-                        res.push({ "Customer Id": rows[i].CustomerId, "Customer Name": rows[i].CustomerName, "Customer Email": rows[i].CustomerEmail });
-                        i++;
-                    }
-                    response.status(200).send(res);
+                    response.status(200).send(rows);
                 } else {
                     response.status(400).send(err);
                 }

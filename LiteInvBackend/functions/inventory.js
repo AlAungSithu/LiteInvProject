@@ -29,7 +29,7 @@ exports.retrieve_item = functions.https.onRequest(async (request, response) => {
         if (id) {
             con.query(`SELECT * FROM Inventory WHERE ItemId = ${id}`, (err, rows, fields) => {
                 if (!err) {
-                    res.push({ "Item Id": rows[0].ItemId, "Item Name": rows[0].ItemName });
+                    res.push({ "Item Id": rows[0].ItemId, "Item Name": rows[0].ItemName, "Item Count": rows[0].ItemCount });
                     response.status(200).send(res);
                 } else {
                     response.status(400).send(err);
@@ -42,7 +42,7 @@ exports.retrieve_item = functions.https.onRequest(async (request, response) => {
                 if (!err) {
                     let i = 0;
                     while (i < rows.length) {
-                        res.push({ "Item Id": rows[i].ItemId, "Item Name": rows[i].ItemName });
+                        res.push({ "Item Id": rows[i].ItemId, "Item Name": rows[i].ItemName, "Item Count": rows[i].ItemCount });
                         i++;
                     }
                     response.status(200).send(res);
