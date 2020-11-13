@@ -11,10 +11,23 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
         let seller_id = request.query.seller_id;
         let amount = request.query.amount;
 
-        // Validation Checks
-
-
         // Creation
+        let querystring = `INSERT INTO EmployeePurchase(ItemId, EmployeeId, SellerId, Amount, PurchaseDate) VALUES(${item_id}, ${employee_id}, ${seller_id}, ${amount}, CURDATE());`;
+        con.query(querystring, (err1, rows1, fields1) => {
+            if (err1) {
+                response.status(400).send(err1.sqlMessage);
+            } else {
+                let purchase_id = rows1.insertId;
+                let queryselect = `SELECT ItemId AS "Item Id", EmployeeId AS "Employee Id", SellerId AS "Seller Id", Amount, PurchaseDate AS "Purchase Date"
+                 FROM EmployeePurchase WHERE PurchaseId = ${purchase_id};`;
+                con.query(queryselect, (err2, rows2, fields2) => {
+                    if (err2) {
+                        response.status(400).send(err2);
+                    }
+                    response.status(201).send(rows2);
+                })
+            }
+        })
         
     })
 });
