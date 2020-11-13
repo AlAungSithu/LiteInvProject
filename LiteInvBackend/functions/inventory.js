@@ -84,31 +84,20 @@ exports.retrieve_history = functions.https.onRequest(async (request, response) =
         let start_date = request.query.start_date;
         let end_date = request.query.end_date;
 
-        let querystring = ``;
-        // No Dates
-        if (!start_date && !end_date) {
-            querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
-            FROM StockHistory s JOIN Inventory i
-            ON s.ItemId = i.ItemId;`;
-        // Only Start
-        } else if (start_date && !end_date) {
-            querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
-            FROM StockHistory s JOIN Inventory i
-            ON s.ItemId = i.ItemId
-            WHERE s.Date >= "${start_date}";`;
-        // Only End
-        } else if (!start_date && end_date) {
-            querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
-            FROM StockHistory s JOIN Inventory i
-            ON s.ItemId = i.ItemId
-            WHERE s.Date <= "${end_date}";`;
-        // Both Dates
-        } else if (start_date && end_date) {
-            querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
+        // No Start Date, Set to Min Date
+        if (!start_date) {
+            start_date = "0000-00-00"
+        }
+        // No End Date, Set to Max Date
+        if (!end_date) {
+            end_date = "9999-12-31"
+        }
+
+        querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
             FROM StockHistory s JOIN Inventory i
             ON s.ItemId = i.ItemId
             WHERE s.Date >= "${start_date}" AND s.date <= "${end_date}";`;
-        }
+
         con.query(querystring, (err, rows, fields) => {
             if (!err) {
                 response.status(200).send(rows);
