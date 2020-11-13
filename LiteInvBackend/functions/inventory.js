@@ -13,7 +13,7 @@ exports.create_item = functions.https.onRequest(async (request, response) => {
                 res.push({ "Item Id": rows.insertId, "Item Name": name });
                 response.status(201).send(res);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
     })
@@ -36,7 +36,7 @@ exports.retrieve_item = functions.https.onRequest(async (request, response) => {
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -57,7 +57,7 @@ exports.update_item = functions.https.onRequest(async (request, response) => {
                 //res.push({ ItemId: id, ItemName: new_name })
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -72,7 +72,7 @@ exports.delete_item = functions.https.onRequest(async (request, response) => {
             if (!err) {
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
     })
@@ -102,7 +102,7 @@ exports.retrieve_history = functions.https.onRequest(async (request, response) =
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 

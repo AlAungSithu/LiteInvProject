@@ -29,7 +29,7 @@ exports.create_seller = functions.https.onRequest(async (request, response) => {
                 res.push({ "Seller Id": rows.insertId, "Seller Name": name, "Seller Email": email });
                 response.status(201).send(res);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -59,7 +59,7 @@ exports.retrieve_seller = functions.https.onRequest(async (request, response) =>
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
     })
@@ -81,14 +81,14 @@ exports.update_seller = functions.https.onRequest(async (request, response) => {
             sql = `UPDATE Seller SET SellerEmail = "${new_email}" WHERE SellerId = "${id}";`
         } else {
             // Neither input - Should never happen
-            response.status(400).send(err);
+            response.status(400).send("Neither input was given!");
         }
 
         con.query(sql, (err, rows, fields) => {
             if (!err) {
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -105,7 +105,7 @@ exports.delete_seller = functions.https.onRequest(async (request, response) => {
             if (!err) {
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
     })
@@ -126,7 +126,7 @@ exports.create_employee = functions.https.onRequest(async (request, response) =>
                 res.push({ "Employee Id": rows.insertId, "Employee Name": name, "Employee Email": email });
                 response.status(201).send(res);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -185,7 +185,7 @@ exports.retrieve_employee = functions.https.onRequest(async (request, response) 
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -207,14 +207,14 @@ exports.update_employee = functions.https.onRequest(async (request, response) =>
             sql = `UPDATE Employee SET EmployeeEmail = "${new_email}" WHERE EmployeeId = "${id}";`
         } else {
             // Neither input
-            response.status(400).send(err);
+            response.status(400).send("Neither input was given!");
         }
 
         con.query(sql, (err, rows, fields) => {
             if (!err) {
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -236,7 +236,7 @@ exports.delete_employee = functions.https.onRequest(async (request, response) =>
             if (!err) {
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
     })
@@ -256,7 +256,7 @@ exports.create_customer = functions.https.onRequest(async (request, response) =>
                 res.push({ "Customer Id": rows.insertId, "Customer Name": name, "Customer Email": email });
                 response.status(201).send(res);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -301,7 +301,7 @@ exports.retrieve_customer = functions.https.onRequest(async (request, response) 
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -323,14 +323,14 @@ exports.update_customer = functions.https.onRequest(async (request, response) =>
             sql = `UPDATE Customer SET CustomerEmail = "${new_email}" WHERE CustomerId = "${id}";`
         } else {
             // Neither input
-            response.status(400).send(err);
+            response.status(400).send("Neither input was given!");
         }
 
         con.query(sql, (err, rows, fields) => {
             if (!err) {
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -352,7 +352,7 @@ exports.delete_customer = functions.https.onRequest(async (request, response) =>
             if (!err) {
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
     })

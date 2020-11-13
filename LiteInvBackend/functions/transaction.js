@@ -22,7 +22,7 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
                  FROM EmployeePurchase WHERE PurchaseId = ${purchase_id};`;
                 con.query(queryselect, (err2, rows2, fields2) => {
                     if (err2) {
-                        response.status(400).send(err2);
+                        response.status(400).send(err2.sqlMessage);
                     }
                     response.status(201).send(rows2);
                 })
@@ -70,7 +70,7 @@ exports.retrieve_purchase = functions.https.onRequest(async (request, response) 
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -134,7 +134,7 @@ exports.retrieve_order = functions.https.onRequest(async (request, response) => 
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
@@ -198,7 +198,7 @@ exports.retrieve_refund = functions.https.onRequest(async (request, response) =>
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err);
+                response.status(400).send(err.sqlMessage);
             }
         })
 
