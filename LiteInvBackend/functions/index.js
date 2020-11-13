@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 exports.inventory = require('./inventory');
+exports.transaction = require('./transaction');
 // const express = require('express');
 const cors = require('cors')({origin: true});
 // const { extractInstanceAndPath } = require('firebase-functions/lib/providers/database');
@@ -39,6 +40,7 @@ exports.retrieve_seller = functions.https.onRequest(async (request, response) =>
     cors(request, response, () => {
     
         let id = request.query.seller_id;
+        let querystring = ``;
 
         if (id) {
             querystring = `SELECT s.SellerId AS "Seller Id", s.SellerName AS "Seller Name", s.SellerEmail AS "Seller Email", COALESCE(COUNT(e.SellerId), 0) AS "Sales to Employees"
@@ -46,28 +48,20 @@ exports.retrieve_seller = functions.https.onRequest(async (request, response) =>
             ON e.SellerId = s.SellerId 
             GROUP BY s.SellerId, s.SellerName, s.SellerEmail
             HAVING s.SellerId = ${id};`
-            con.query(querystring, (err, rows, fields) => {
-                if (!err) {
-                    response.status(200).send(rows);
-                } else {
-                    response.status(400).send(err);
-                }
-            })
-
         // Retrieve All
         } else {
             querystring = `SELECT s.SellerId AS "Seller Id", s.SellerName AS "Seller Name", s.SellerEmail AS "Seller Email", COALESCE(COUNT(e.SellerId), 0) AS "Sales to Employees"
             FROM Seller s LEFT OUTER JOIN EmployeePurchase e 
             ON e.SellerId = s.SellerId 
             GROUP BY s.SellerId, s.SellerName, s.SellerEmail;`;
-            con.query(querystring, (err, rows, fields) => {
-                if (!err) {
-                    response.status(200).send(rows);
-                } else {
-                    response.status(400).send(err);
-                }
-            })
         }
+        con.query(querystring, (err, rows, fields) => {
+            if (!err) {
+                response.status(200).send(rows);
+            } else {
+                response.status(400).send(err);
+            }
+        })
     })
 });
 
@@ -143,6 +137,7 @@ exports.retrieve_employee = functions.https.onRequest(async (request, response) 
     cors(request, response, () => {
     
         let id = request.query.employee_id;
+        let querystring = ``;
 
         if (id) {
             // ID Passed, Return Specific
@@ -165,13 +160,6 @@ exports.retrieve_employee = functions.https.onRequest(async (request, response) 
             GROUP BY e.EmployeeId, e.EmployeeName, e.EmployeeEmail) t3
             ON t1.EmployeeId = t3.EmployeeId
             WHERE t1.EmployeeId = ${id};`;
-            con.query(querystring, (err, rows, fields) => {
-                if (!err) {
-                    response.status(200).send(rows);
-                } else {
-                    response.status(400).send(err);
-                }
-            })
         } else {
             // No ID Passed, Return All
             querystring = `SELECT t1.EmployeeId AS "Employee Id", t1.EmployeeName AS "Employee Name", t1.EmployeeEmail AS "Employee Email", t1.Purchases AS "Purchases from Sellers", t2.Sales AS "Sales to Customers", t3.Refunds AS "Refunds Processed"
@@ -192,14 +180,14 @@ exports.retrieve_employee = functions.https.onRequest(async (request, response) 
             ON e.EmployeeId = r.EmployeeId 
             GROUP BY e.EmployeeId, e.EmployeeName, e.EmployeeEmail) t3
             ON t1.EmployeeId = t3.EmployeeId;`;
-            con.query(querystring, (err, rows, fields) => {
-                if (!err) {
-                    response.status(200).send(rows);
-                } else {
-                    response.status(400).send(err);
-                }
-            })
         }
+        con.query(querystring, (err, rows, fields) => {
+            if (!err) {
+                response.status(200).send(rows);
+            } else {
+                response.status(400).send(err);
+            }
+        })
 
     })
 });
@@ -279,6 +267,7 @@ exports.retrieve_customer = functions.https.onRequest(async (request, response) 
     cors(request, response, () => {
     
         let id = request.query.customer_id;
+        let querystring = ``;
 
         if (id) {
             // ID Passed, Return Specific
@@ -294,13 +283,6 @@ exports.retrieve_customer = functions.https.onRequest(async (request, response) 
             GROUP BY c.CustomerId, c.CustomerName, c.CustomerEmail) t2
             ON t1.CustomerId = t2.CustomerId
             WHERE t1.CustomerId = ${id};`
-            con.query(querystring, (err, rows, fields) => {
-                if (!err) {
-                    response.status(200).send(rows);
-                } else {
-                    response.status(400).send(err);
-                }
-            })
         } else {
             // No ID Passed, Return All
             querystring = `SELECT t1.CustomerId AS "Customer Id", t1.CustomerName AS "Customer Name", t1.CustomerEmail AS "Customer Email", t1.Purchases AS "Purchases from Employees", t2.Refunds AS "Refunds Requested"
@@ -314,15 +296,14 @@ exports.retrieve_customer = functions.https.onRequest(async (request, response) 
             ON c.CustomerId = r.CustomerId 
             GROUP BY c.CustomerId, c.CustomerName, c.CustomerEmail) t2
             ON t1.CustomerId = t2.CustomerId;`
-
-            con.query(querystring, (err, rows, fields) => {
-                if (!err) {
-                    response.status(200).send(rows);
-                } else {
-                    response.status(400).send(err);
-                }
-            })
         }
+        con.query(querystring, (err, rows, fields) => {
+            if (!err) {
+                response.status(200).send(rows);
+            } else {
+                response.status(400).send(err);
+            }
+        })
 
     })
 });

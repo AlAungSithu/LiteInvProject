@@ -23,34 +23,22 @@ exports.retrieve_item = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
 
         let id = request.query.item_id;
-        res = [];
-        
+        let querystring = ``;
+
         // Retrieve ID
         if (id) {
-            con.query(`SELECT * FROM Inventory WHERE ItemId = ${id}`, (err, rows, fields) => {
-                if (!err) {
-                    res.push({ "Item Id": rows[0].ItemId, "Item Name": rows[0].ItemName, "Item Count": rows[0].ItemCount });
-                    response.status(200).send(res);
-                } else {
-                    response.status(400).send(err);
-                }
-            })
-
+            querystring = `SELECT ItemId AS "Item Id", ItemName AS "Item Name", ItemCount AS "Item Count" FROM Inventory WHERE ItemId = ${id};`
         // Retrieve All
         } else {
-            con.query(`SELECT * FROM Inventory`, (err, rows, fields) => {
-                if (!err) {
-                    let i = 0;
-                    while (i < rows.length) {
-                        res.push({ "Item Id": rows[i].ItemId, "Item Name": rows[i].ItemName, "Item Count": rows[i].ItemCount });
-                        i++;
-                    }
-                    response.status(200).send(res);
-                } else {
-                    response.status(400).send(err);
-                }
-            })
+            querystring = `SELECT ItemId AS "Item Id", ItemName AS "Item Name", ItemCount AS "Item Count" FROM Inventory;`
         }
+        con.query(querystring, (err, rows, fields) => {
+            if (!err) {
+                response.status(200).send(rows);
+            } else {
+                response.status(400).send(err);
+            }
+        })
 
     })
 });
@@ -87,5 +75,47 @@ exports.delete_item = functions.https.onRequest(async (request, response) => {
                 response.status(400).send(err);
             }
         })
+    })
+});
+
+// STOCK HISTORY OPERATIONS
+exports.retrieve_history = functions.https.onRequest(async (request, response) => {
+    cors(request, response, () => {
+        let start_date = request.query.start_date;
+        let end_date = request.query.end_date;
+
+        let querystring = ``;
+        // No Dates
+        if (!start_date && !end_date) {
+            querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
+            FROM StockHistory s JOIN Inventory i
+            ON s.ItemId = i.ItemId;`;
+        // Only Start
+        } else if (start_date && !end_date) {
+            querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
+            FROM StockHistory s JOIN Inventory i
+            ON s.ItemId = i.ItemId
+            WHERE s.Date >= "${start_date}";`;
+        // Only End
+        } else if (!start_date && end_date) {
+            querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
+            FROM StockHistory s JOIN Inventory i
+            ON s.ItemId = i.ItemId
+            WHERE s.Date <= "${end_date}";`;
+        // Both Dates
+        } else if (start_date && end_date) {
+            querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
+            FROM StockHistory s JOIN Inventory i
+            ON s.ItemId = i.ItemId
+            WHERE s.Date >= "${start_date}" AND s.date <= "${end_date}";`;
+        }
+        con.query(querystring, (err, rows, fields) => {
+            if (!err) {
+                response.status(200).send(rows);
+            } else {
+                response.status(400).send(err);
+            }
+        })
+
     })
 });
