@@ -8,12 +8,12 @@ exports.create_item = functions.https.onRequest(async (request, response) => {
         let name = request.query.item_name;
         res = [];
 
-        con.query(`INSERT INTO Inventory (ItemName) VALUES ("${name}");`, (err, rows, fields) => {
+        con.query(`INSERT INTO Inventory (ItemName) VALUES (?);`, [name], (err, rows, fields) => {
             if (!err) {
                 res.push({ "Item Id": rows.insertId, "Item Name": name });
                 response.status(201).send(res);
             } else {
-                response.status(400).send(err.sqlMessage);
+                response.status(400).send([{"Error Message" : "Failed to create Item."}]);
             }
         })
     })
@@ -27,16 +27,16 @@ exports.retrieve_item = functions.https.onRequest(async (request, response) => {
 
         // Retrieve ID
         if (id) {
-            querystring = `SELECT ItemId AS "Item Id", ItemName AS "Item Name", ItemCount AS "Item Count" FROM Inventory WHERE ItemId = ${id};`
+            querystring = `SELECT ItemId AS "Item Id", ItemName AS "Item Name", ItemCount AS "Item Count" FROM Inventory WHERE ItemId = ?;`
         // Retrieve All
         } else {
             querystring = `SELECT ItemId AS "Item Id", ItemName AS "Item Name", ItemCount AS "Item Count" FROM Inventory;`
         }
-        con.query(querystring, (err, rows, fields) => {
+        con.query(querystring, [id], (err, rows, fields) => {
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err.sqlMessage);
+                response.status(400).send([{"Error Message" : "Failed to retrieve Item(s)."}]);
             }
         })
 
@@ -50,14 +50,14 @@ exports.update_item = functions.https.onRequest(async (request, response) => {
         let new_name = request.query.item_name;
         res = [];
  
-        sql = `UPDATE Inventory SET ItemName = "${new_name}" WHERE ItemId = "${id}";`
+        sql = `UPDATE Inventory SET ItemName = ? WHERE ItemId = ?;`
 
-        con.query(sql, (err, rows, fields) => {
+        con.query(sql, [new_name, id], (err, rows, fields) => {
             if (!err) {
                 //res.push({ ItemId: id, ItemName: new_name })
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err.sqlMessage);
+                response.status(400).send([{"Error Message" : "Failed to update Item."}]);
             }
         })
 
@@ -68,11 +68,16 @@ exports.delete_item = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
         let id = request.query.item_id;
 
-        con.query(`DELETE FROM Inventory WHERE ItemId = ${id}`, (err, rows, fields) => {
+        if (!id) {
+            response.status(400).send([{"Error Message" : `Please enter an Item Id!`}]);
+            return;
+        }
+
+        con.query(`DELETE FROM Inventory WHERE ItemId = ?`, [id], (err, rows, fields) => {
             if (!err) {
                 response.sendStatus(200);
             } else {
-                response.status(400).send(err.sqlMessage);
+                response.status(400).send([{"Error Message" : `Cannot delete Item ${id} because there are Transactions that include this item.`}]);
             }
         })
     })
@@ -93,16 +98,16 @@ exports.retrieve_history = functions.https.onRequest(async (request, response) =
             end_date = "9999-12-31"
         }
 
-        querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName, s.Amount
+        querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName AS "Item Name", s.Amount
             FROM StockHistory s JOIN Inventory i
             ON s.ItemId = i.ItemId
-            WHERE s.Date >= "${start_date}" AND s.date <= "${end_date}";`;
+            WHERE s.Date >= ? AND s.date <= ?;`;
 
-        con.query(querystring, (err, rows, fields) => {
+        con.query(querystring, [start_date, end_date], (err, rows, fields) => {
             if (!err) {
                 response.status(200).send(rows);
             } else {
-                response.status(400).send(err.sqlMessage);
+                response.status(400).send([{"Error Message" : "Failed to retrieve Stock History."}]);
             }
         })
 
