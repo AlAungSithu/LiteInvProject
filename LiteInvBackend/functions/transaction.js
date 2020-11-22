@@ -22,8 +22,8 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
         con.query(queryset, (err1, rows1, fields1) => {
 
             // Create Item
-            let querystring = `INSERT INTO EmployeePurchase(ItemId, EmployeeId, SellerId, Amount, PurchaseDate) VALUES(${item_id}, ${employee_id}, ${seller_id}, ${amount}, CURDATE());`;
-            con.query(querystring, (err1, rows1, fields1) => {
+            let querystring = `INSERT INTO EmployeePurchase(ItemId, EmployeeId, SellerId, Amount, PurchaseDate) VALUES(?, ?, ?, ?, CURDATE());`;
+            con.query(querystring, [item_id, employee_id, seller_id, amount], (err1, rows1, fields1) => {
                 if (err1) {
                     response.status(400).send([{"Error Message": "Failed to create Employee Purchase. Please ensure that the Item, Seller, and Employee exist."}]);
                     con.query("ROLLBACK;");
@@ -32,8 +32,8 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
 
                     // Updates ItemCount in Inventory
                     purchase_id = rows1.insertId;
-                    let queryupdate = `UPDATE Inventory SET ItemCount = ItemCount + ${amount} WHERE ItemId = ${item_id};`;
-                    con.query(queryupdate, (err2, rows2, fields2) => {
+                    let queryupdate = `UPDATE Inventory SET ItemCount = ItemCount + ? WHERE ItemId = ?;`;
+                    con.query(queryupdate, [amount, item_id], (err2, rows2, fields2) => {
                         if (err2) {
                             response.status(400).send([{"Error Message": "Failed to update Inventory count... cancelling Employee Purchase!"}]);
                             con.query("ROLLBACK;");
@@ -42,8 +42,8 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
 
                             // Retrieves to send back data to Frontend
                             let queryselect = `SELECT ItemId AS "Item Id", EmployeeId AS "Employee Id", SellerId AS "Seller Id", Amount, PurchaseDate AS "Purchase Date"
-                            FROM EmployeePurchase WHERE PurchaseId = ${purchase_id};`;
-                            con.query(queryselect, (err3, rows3, fields3) => {
+                            FROM EmployeePurchase WHERE PurchaseId = ?;`;
+                            con.query(queryselect, [purchase_id], (err3, rows3, fields3) => {
                                 if (err3) {
                                     response.status(400).send([{"Error Message": "Failed to retrieve the Employee Purchase we just created... cancelling Employee Purchase!"}]);
                                     con.query("ROLLBACK;");
@@ -129,8 +129,8 @@ exports.create_order = functions.https.onRequest(async (request, response) => {
         con.query(queryset, (err1, rows1, fields1) => {
 
             // Validation Checks
-            let queryCount = `SELECT * FROM Inventory WHERE ItemId = ${item_id};`;
-            con.query(queryCount, (err, rows, fields) => {
+            let queryCount = `SELECT * FROM Inventory WHERE ItemId = ?;`;
+            con.query(queryCount, [item_id], (err, rows, fields) => {
                 if (err || rows.length == 0) {
                     response.status(400).send([{"Error Message" : `Failed to retrieve Item Count prior to Creating Order. Please ensure Item #${item_id} exists.`}]);
                     con.query("ROLLBACK;");
@@ -140,26 +140,25 @@ exports.create_order = functions.https.onRequest(async (request, response) => {
                     let itemName = rows[0].ItemName;
 
                     if (inventoryCount < amount) {
-                        response.status(400).send([{"Error Message" : `You cannot purchase ${amount} of '${itemName}' (ID: ${item_id}) because there are only ${inventoryCount}.`}]);
+                        response.status(400).send([{"Error Message" : `The Customer cannot purchase ${amount} of '${itemName}' (ID: ${item_id}) because there are only ${inventoryCount}.`}]);
                         con.query("ROLLBACK;");
 
                     } else {
 
                         // Creation
-                        let querystring = `INSERT INTO CustomerOrder(ItemId, EmployeeId, CustomerId, Amount, OrderDate) VALUES(${item_id}, ${employee_id}, ${customer_id}, ${amount}, CURDATE());`;
-                        con.query(querystring, (err2, rows2, fields2) => {
+                        let querystring = `INSERT INTO CustomerOrder(ItemId, EmployeeId, CustomerId, Amount, OrderDate) VALUES(?, ?, ?, ?, CURDATE());`;
+                        con.query(querystring, [item_id, employee_id, customer_id, amount], (err2, rows2, fields2) => {
                             if (err2) {
                                 // Insert Failed
-                                // response.status(400).send([{"Error Message": "Failed to create Customer Order. Please ensure that the Item, Employee, and Customer exist."}]);
-                                response.status(400).send(err2);
+                                response.status(400).send([{"Error Message": "Failed to create Customer Order. Please ensure that the Item, Employee, and Customer exist."}]);
                                 con.query("ROLLBACK;");
 
                             } else {
 
                                 order_id = rows2.insertId;
                                 
-                                let queryupdate = `UPDATE Inventory SET ItemCount = ItemCount - ${amount} WHERE ItemId = ${item_id};`
-                                con.query(queryupdate, (err3, rows3, fields3) => {
+                                let queryupdate = `UPDATE Inventory SET ItemCount = ItemCount - ? WHERE ItemId = ?;`
+                                con.query(queryupdate, [amount, item_id], (err3, rows3, fields3) => {
                                     if (err3) {
                                         response.status(400).send([{"Error Message": "Failed to update Inventory count... cancelling Customer Order!"}]);
                                         con.query("ROLLBACK;");
@@ -168,8 +167,8 @@ exports.create_order = functions.https.onRequest(async (request, response) => {
 
                                         // Sends back Data via Retrieve
                                         let queryselect = `SELECT ItemId AS "Item Id", EmployeeId AS "Employee Id", CustomerId AS "Customer Id", Amount, OrderDate AS "Order Date"
-                                        FROM CustomerOrder WHERE OrderId = ${order_id};`
-                                        con.query(queryselect, (err4, rows4, fields4) => {
+                                        FROM CustomerOrder WHERE OrderId = ?;`
+                                        con.query(queryselect, [order_id], (err4, rows4, fields4) => {
                                             if (err4) {
                                                 response.status(400).send([{"Error Message": "Failed to retrieve the Customer Order we just created... cancelling Customer Order!"}]);
                                                 con.query("ROLLBACK;");
@@ -255,61 +254,81 @@ exports.create_refund = functions.https.onRequest(async (request, response) => {
         con.query(queryset, (err1, rows1, fields1) => {
 
             // Validation Checks
-            let queryCount = `SELECT * FROM Inventory WHERE ItemId = ${item_id};`;
-            con.query(queryCount, (err, rows, fields) => {
-                if (err || rows.length == 0) {
-                    response.status(400).send([{"Error Message" : `Failed to retrieve Item Count prior to Creating Refund. Please ensure Item #${item_id} exists.`}]);
+            let queryCount = `SELECT * FROM (
+                SELECT co.CustomerId, co.ItemId, SUM(co.Amount) AS TotalPurchasedPrev
+                FROM CustomerOrder co
+                GROUP BY co.CustomerId, co.ItemId
+                HAVING co.CustomerId = ? AND co.ItemId = ?) t1
+                LEFT OUTER JOIN
+                (SELECT cr.CustomerId, cr.ItemId, SUM(cr.Amount) AS TotalRefundPrev
+                FROM CustomerRefund cr
+                GROUP BY cr.CustomerId, cr.ItemId
+                HAVING cr.CustomerId = ? AND cr.ItemId = ?) t2
+                ON t1.CustomerId = t2.CustomerId;`;
+            con.query(queryCount, [customer_id, item_id, customer_id, item_id], (err, rows, fields) => {
+                
+                if (err) {
+                    // Failed to Retreive
+                    response.status(400).send([{"Error Message" : `Failed to retrieve previous Purchase and Refund counts prior to Creating Refund.`}]);
+                    con.query("ROLLBACK;");
+
+                } else if (rows.length == 0) {
+                    // Retreived but no rows returned
+                    response.status(400).send([{"Error Message" : `Please ensure that the Customer and Item exist and that the Customer has purchased the Item.`}]);
                     con.query("ROLLBACK;");
 
                 } else {
-                    // let inventoryCount = rows[0].ItemCount;
-                    // let itemName = rows[0].ItemName;
+                    
+                    let prevPurchaseCount = rows[0].TotalPurchasedPrev;
+                    let prevRefundCount = rows[0].TotalRefundPrev;
+                    if (prevRefundCount == null) {
+                        prevRefundCount = 0;
+                    }
+                    let refundableAmount = prevPurchaseCount - prevRefundCount;
 
-                    // if (inventoryCount < amount) {
-                    //     response.status(400).send([{"Error Message" : `You cannot purchase ${amount} of '${itemName}' (ID: ${item_id}) because there are only ${inventoryCount}.`}]);
-                    //     con.query("ROLLBACK;");
+                    if ((refundableAmount) < amount) {
+                        response.status(400).send([{"Error Message" : `The Customer can only receive a refund on ${refundableAmount} of Item: '${item_id}', but the refund amount is ${amount}.`}]);
+                        con.query("ROLLBACK;");
+                    } else {
 
-                    // } else {
+                        // Creation
+                        let querystring = `INSERT INTO CustomerRefund(ItemId, EmployeeId, CustomerId, Amount, RefundDate) VALUES(?, ?, ?, ?, CURDATE());`;
+                        con.query(querystring, [item_id, employee_id, customer_id, amount], (err2, rows2, fields2) => {
+                            if (err2) {
+                                // Insert Failed
+                                response.status(400).send([{"Error Message": "Failed to create Customer Refund. Please ensure that the Employee exists."}]);
+                                con.query("ROLLBACK;");
 
-                    //     // Creation
-                    //     let querystring = `INSERT INTO CustomerOrder(ItemId, EmployeeId, CustomerId, Amount, OrderDate) VALUES(${item_id}, ${employee_id}, ${customer_id}, ${amount}, CURDATE());`;
-                    //     con.query(querystring, (err2, rows2, fields2) => {
-                    //         if (err2) {
-                    //             // Insert Failed
-                    //             // response.status(400).send([{"Error Message": "Failed to create Customer Order. Please ensure that the Item, Employee, and Customer exist."}]);
-                    //             response.status(400).send(err2);
-                    //             con.query("ROLLBACK;");
+                            } else {
 
-                    //         } else {
-
-                    //             order_id = rows2.insertId;
+                                refund_id = rows2.insertId;
                                 
-                    //             let queryupdate = `UPDATE Inventory SET ItemCount = ItemCount - ${amount} WHERE ItemId = ${item_id};`
-                    //             con.query(queryupdate, (err3, rows3, fields3) => {
-                    //                 if (err3) {
-                    //                     response.status(400).send([{"Error Message": "Failed to update Inventory count... cancelling Customer Order!"}]);
-                    //                     con.query("ROLLBACK;");
+                                let queryupdate = `UPDATE Inventory SET ItemCount = ItemCount + ? WHERE ItemId = ?;`
+                                con.query(queryupdate, [amount, item_id], (err3, rows3, fields3) => {
+                                    if (err3) {
+                                        response.status(400).send([{"Error Message": "Failed to update Inventory count... cancelling Customer Refund!"}]);
+                                        con.query("ROLLBACK;");
                                         
-                    //                 } else {
+                                    } else {
 
-                    //                     // Sends back Data via Retrieve
-                    //                     let queryselect = `SELECT ItemId AS "Item Id", EmployeeId AS "Employee Id", CustomerId AS "Customer Id", Amount, OrderDate AS "Order Date"
-                    //                     FROM CustomerOrder WHERE OrderId = ${order_id};`
-                    //                     con.query(queryselect, (err4, rows4, fields4) => {
-                    //                         if (err4) {
-                    //                             response.status(400).send([{"Error Message": "Failed to retrieve the Customer Order we just created... cancelling Customer Order!"}]);
-                    //                             con.query("ROLLBACK;");
+                                        // Sends back Data via Retrieve
+                                        let queryselect = `SELECT ItemId AS "Item Id", EmployeeId AS "Employee Id", CustomerId AS "Customer Id", Amount, RefundDate AS "Refund Date"
+                                        FROM CustomerRefund WHERE RefundId = ?;`
+                                        con.query(queryselect, [refund_id], (err4, rows4, fields4) => {
+                                            if (err4) {
+                                                response.status(400).send([{"Error Message": "Failed to retrieve the Customer Refund we just created... cancelling Customer Refund!"}]);
+                                                con.query("ROLLBACK;");
 
-                    //                         } else {
-                    //                             response.status(201).send(rows4);
-                    //                             con.query("COMMIT;");
-                    //                         }
-                    //                     })
-                    //                 }
-                    //             })
-                    //         }
-                    //     })
-                    // }
+                                            } else {
+                                                response.status(201).send(rows4);
+                                                con.query("COMMIT;");
+                                            }
+                                        })
+                                    }
+                                })
+                            }
+                        })
+                    }
                 }
             })
         })
