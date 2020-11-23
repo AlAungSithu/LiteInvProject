@@ -4,7 +4,8 @@ const con = mysql.createConnection({
     user: 'admin',
     password: '256Team256',
     port: 3306,
-    database: 'LiteInv'
+    database: 'LiteInv',
+    multipleStatements: true
 });
  
 con.connect((err) => {

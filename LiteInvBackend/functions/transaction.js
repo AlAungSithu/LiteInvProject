@@ -18,8 +18,13 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
         }
 
         // Start Transaction
-        let queryset = "START TRANSACTION;";
+        let queryset = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED; START TRANSACTION;";
         con.query(queryset, (err1, rows1, fields1) => {
+            
+            if (err1) {
+                response.status(400).send([{"Error Message": "Failed to access database."}]);
+                return;
+            }
 
             // Create Item
             let querystring = `INSERT INTO EmployeePurchase(ItemId, EmployeeId, SellerId, Amount, PurchaseDate) VALUES(?, ?, ?, ?, CURDATE());`;
@@ -125,8 +130,13 @@ exports.create_order = functions.https.onRequest(async (request, response) => {
             return;
         }
 
-        let queryset = "START TRANSACTION;";
+        let queryset = "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; START TRANSACTION;";
         con.query(queryset, (err1, rows1, fields1) => {
+
+            if (err1) {
+                response.status(400).send([{"Error Message": "Failed to access database."}]);
+                return;
+            }
 
             // Validation Checks
             let queryCount = `SELECT * FROM Inventory WHERE ItemId = ?;`;
@@ -250,8 +260,13 @@ exports.create_refund = functions.https.onRequest(async (request, response) => {
             return;
         }
 
-        let queryset = "START TRANSACTION;";
+        let queryset = "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; START TRANSACTION;";
         con.query(queryset, (err1, rows1, fields1) => {
+
+            if (err1) {
+                response.status(400).send([{"Error Message": "Failed to access database."}]);
+                return;
+            }
 
             // Validation Checks
             let queryCount = `SELECT * FROM (
