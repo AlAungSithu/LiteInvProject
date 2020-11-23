@@ -98,13 +98,44 @@ exports.retrieve_history = functions.https.onRequest(async (request, response) =
             end_date = "9999-12-31"
         }
 
-        querystring = `SELECT s.Date AS "Transaction Date", s.Type AS "Transaction Type", s.ItemId AS "Item Id", i.ItemName AS "Item Name", s.Amount
-            FROM StockHistory s JOIN Inventory i
-            ON s.ItemId = i.ItemId
-            WHERE s.Date >= ? AND s.date <= ?;`;
+
+
+        querystring = `SELECT T1.Date, T1.Type AS "Transaction Type", T1.ItemId AS "Item Id", i.ItemName AS "Item Name", T1.Amount FROM (
+            SELECT ItemId,
+            (Amount * -1) AS Amount,
+            'Customer Order' AS Type,
+            DATE(OrderDate) AS Date,
+            OrderDate AS DateTime
+            FROM CustomerOrder
+            UNION
+            SELECT ItemId,
+                    Amount,
+                    'Employee Purchase' AS Type,
+                    DATE(PurchaseDate) AS Date,
+                    PurchaseDate AS DateTime
+            FROM EmployeePurchase
+            UNION
+            SELECT ItemId,
+                    Amount,
+                    'Customer Refund' AS Type,
+                    DATE(RefundDate) AS Date,
+                    RefundDate AS DateTime
+            FROM CustomerRefund) T1
+            JOIN Inventory i
+            ON i.ItemId = T1.ItemId
+            WHERE T1.Date >= ? AND T1.Date <= ?
+            ORDER BY T1.DateTime;`;
 
         con.query(querystring, [start_date, end_date], (err, rows, fields) => {
             if (!err) {
+                
+                let i = 0;
+                while (i < rows.length) {
+                    let wholeDate = (rows[i].Date).toLocaleString().substring(0, 10);
+                    rows[i].Date = wholeDate;
+                    i++;
+                }
+
                 response.status(200).send(rows);
             } else {
                 response.status(400).send([{"Error Message" : "Failed to retrieve Stock History."}]);

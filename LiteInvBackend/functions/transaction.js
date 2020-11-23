@@ -27,7 +27,7 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
             }
 
             // Create Item
-            let querystring = `INSERT INTO EmployeePurchase(ItemId, EmployeeId, SellerId, Amount, PurchaseDate) VALUES(?, ?, ?, ?, CURDATE());`;
+            let querystring = `INSERT INTO EmployeePurchase(ItemId, EmployeeId, SellerId, Amount, PurchaseDate) VALUES(?, ?, ?, ?, NOW());`;
             con.query(querystring, [item_id, employee_id, seller_id, amount], (err1, rows1, fields1) => {
                 if (err1) {
                     response.status(400).send([{"Error Message": "Failed to create Employee Purchase. Please ensure that the Item, Seller, and Employee exist."}]);
@@ -46,7 +46,7 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
                         } else {
 
                             // Retrieves to send back data to Frontend
-                            let queryselect = `SELECT ItemId AS "Item Id", EmployeeId AS "Employee Id", SellerId AS "Seller Id", Amount, PurchaseDate AS "Purchase Date"
+                            let queryselect = `SELECT PurchaseId AS "Purchase Id", ItemId AS "Item Id", EmployeeId AS "Employee Id", SellerId AS "Seller Id", Amount, PurchaseDate AS "Purchase Date"
                             FROM EmployeePurchase WHERE PurchaseId = ?;`;
                             con.query(queryselect, [purchase_id], (err3, rows3, fields3) => {
                                 if (err3) {
@@ -54,6 +54,8 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
                                     con.query("ROLLBACK;");
 
                                 }
+                                let wholeDate = rows3[0]['Purchase Date'].toLocaleString().substring(0, 10);
+                                rows3[0]['Purchase Date'] = wholeDate;
                                 response.status(201).send(rows3);
                                 con.query("COMMIT;");
                             })
@@ -99,11 +101,18 @@ exports.retrieve_purchase = functions.https.onRequest(async (request, response) 
             JOIN Employee e
             ON ep.EmployeeId = e.EmployeeId
             JOIN Seller s
-            ON ep.SellerId = s.SellerId;`;
+            ON ep.SellerId = s.SellerId
+            ORDER BY ep.PurchaseId;`;
         }
 
         con.query(querystring, [purchase_id], (err, rows, fields) => {
             if (!err) {
+                let i = 0;
+                while (i < rows.length) {
+                    let wholeDate = rows[i]['Purchase Date'].toLocaleString().substring(0, 10);
+                    rows[i]['Purchase Date'] = wholeDate;
+                    i++;
+                }
                 response.status(200).send(rows);
             } else {
                 response.status(400).send([{"Error Message" : "Failed to retrieve Employee Purchase(s)."}]);
@@ -156,7 +165,7 @@ exports.create_order = functions.https.onRequest(async (request, response) => {
                     } else {
 
                         // Creation
-                        let querystring = `INSERT INTO CustomerOrder(ItemId, EmployeeId, CustomerId, Amount, OrderDate) VALUES(?, ?, ?, ?, CURDATE());`;
+                        let querystring = `INSERT INTO CustomerOrder(ItemId, EmployeeId, CustomerId, Amount, OrderDate) VALUES(?, ?, ?, ?, NOW());`;
                         con.query(querystring, [item_id, employee_id, customer_id, amount], (err2, rows2, fields2) => {
                             if (err2) {
                                 // Insert Failed
@@ -176,7 +185,7 @@ exports.create_order = functions.https.onRequest(async (request, response) => {
                                     } else {
 
                                         // Sends back Data via Retrieve
-                                        let queryselect = `SELECT ItemId AS "Item Id", EmployeeId AS "Employee Id", CustomerId AS "Customer Id", Amount, OrderDate AS "Order Date"
+                                        let queryselect = `SELECT OrderId AS "Order Id", ItemId AS "Item Id", EmployeeId AS "Employee Id", CustomerId AS "Customer Id", Amount, OrderDate AS "Order Date"
                                         FROM CustomerOrder WHERE OrderId = ?;`
                                         con.query(queryselect, [order_id], (err4, rows4, fields4) => {
                                             if (err4) {
@@ -184,6 +193,8 @@ exports.create_order = functions.https.onRequest(async (request, response) => {
                                                 con.query("ROLLBACK;");
 
                                             } else {
+                                                let wholeDate = rows4[0]['Order Date'].toLocaleString().substring(0, 10);
+                                                rows4[0]['Order Date'] = wholeDate;
                                                 response.status(201).send(rows4);
                                                 con.query("COMMIT;");
                                             }
@@ -230,11 +241,18 @@ exports.retrieve_order = functions.https.onRequest(async (request, response) => 
             JOIN Employee e
             ON o.EmployeeId = e.EmployeeId
             JOIN Customer c
-            ON o.CustomerId = c.CustomerId;`;
+            ON o.CustomerId = c.CustomerId
+            ORDER BY o.OrderId;`;
         }
 
         con.query(querystring, [order_id], (err, rows, fields) => {
             if (!err) {
+                let i = 0;
+                while (i < rows.length) {
+                    let wholeDate = rows[i]['Order Date'].toLocaleString().substring(0, 10);
+                    rows[i]['Order Date'] = wholeDate;
+                    i++;
+                }
                 response.status(200).send(rows);
             } else {
                 response.status(400).send([{"Error Message" : "Failed to retrieve Customer Order(s)."}]);
@@ -307,7 +325,7 @@ exports.create_refund = functions.https.onRequest(async (request, response) => {
                     } else {
 
                         // Creation
-                        let querystring = `INSERT INTO CustomerRefund(ItemId, EmployeeId, CustomerId, Amount, RefundDate) VALUES(?, ?, ?, ?, CURDATE());`;
+                        let querystring = `INSERT INTO CustomerRefund(ItemId, EmployeeId, CustomerId, Amount, RefundDate) VALUES(?, ?, ?, ?, NOW());`;
                         con.query(querystring, [item_id, employee_id, customer_id, amount], (err2, rows2, fields2) => {
                             if (err2) {
                                 // Insert Failed
@@ -327,7 +345,7 @@ exports.create_refund = functions.https.onRequest(async (request, response) => {
                                     } else {
 
                                         // Sends back Data via Retrieve
-                                        let queryselect = `SELECT ItemId AS "Item Id", EmployeeId AS "Employee Id", CustomerId AS "Customer Id", Amount, RefundDate AS "Refund Date"
+                                        let queryselect = `SELECT RefundId AS "Refund Id", ItemId AS "Item Id", EmployeeId AS "Employee Id", CustomerId AS "Customer Id", Amount, RefundDate AS "Refund Date"
                                         FROM CustomerRefund WHERE RefundId = ?;`
                                         con.query(queryselect, [refund_id], (err4, rows4, fields4) => {
                                             if (err4) {
@@ -335,6 +353,8 @@ exports.create_refund = functions.https.onRequest(async (request, response) => {
                                                 con.query("ROLLBACK;");
 
                                             } else {
+                                                let wholeDate = rows4[0]['Refund Date'].toLocaleString().substring(0, 10);
+                                                rows4[0]['Refund Date'] = wholeDate;
                                                 response.status(201).send(rows4);
                                                 con.query("COMMIT;");
                                             }
@@ -382,11 +402,18 @@ exports.retrieve_refund = functions.https.onRequest(async (request, response) =>
             JOIN Employee e
             ON r.EmployeeId = e.EmployeeId
             JOIN Customer c
-            ON r.CustomerId = c.CustomerId;`;
+            ON r.CustomerId = c.CustomerId
+            ORDER BY r.RefundId;;`;
         }
 
         con.query(querystring, [refund_id], (err, rows, fields) => {
             if (!err) {
+                let i = 0;
+                while (i < rows.length) {
+                    let wholeDate = rows[i]['Refund Date'].toLocaleString().substring(0, 10);
+                    rows[i]['Refund Date'] = wholeDate;
+                    i++;
+                }
                 response.status(200).send(rows);
             } else {
                 response.status(400).send([{"Error Message" : "Failed to retrieve Customer Refund(s)."}]);
