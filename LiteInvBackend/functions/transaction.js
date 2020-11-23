@@ -260,7 +260,7 @@ exports.create_refund = functions.https.onRequest(async (request, response) => {
             return;
         }
 
-        let queryset = "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; START TRANSACTION;";
+        let queryset = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE; START TRANSACTION;";
         con.query(queryset, (err1, rows1, fields1) => {
 
             if (err1) {
