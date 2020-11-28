@@ -16,6 +16,7 @@ export default function People() {
             <PeopleCard
               title="Entities from whom we are supplied the items"
               type="Seller"
+              summaries={["Sales to Employees"]}
               createUrl="https://us-central1-liteinvbackend.cloudfunctions.net/create_seller"
               retrieveUrl="https://us-central1-liteinvbackend.cloudfunctions.net/retrieve_seller"
               updateUrl="https://us-central1-liteinvbackend.cloudfunctions.net/update_seller"
@@ -29,6 +30,7 @@ export default function People() {
             <PeopleCard
               title="Our personal"
               type="Employee"
+              summaries={["Purchases from Sellers", "Sales to Customers", "Refunds Processed"]}
               createUrl="https://us-central1-liteinvbackend.cloudfunctions.net/create_employee"
               retrieveUrl="https://us-central1-liteinvbackend.cloudfunctions.net/retrieve_employee"
               updateUrl="https://us-central1-liteinvbackend.cloudfunctions.net/update_employee"
@@ -42,6 +44,7 @@ export default function People() {
             <PeopleCard
               title="Our valued customers"
               type="Customer"
+              summaries={["Purchases from Employees", "Refunds Requested"]}
               createUrl="https://us-central1-liteinvbackend.cloudfunctions.net/create_customer"
               retrieveUrl="https://us-central1-liteinvbackend.cloudfunctions.net/retrieve_customer"
               updateUrl="https://us-central1-liteinvbackend.cloudfunctions.net/update_customer"

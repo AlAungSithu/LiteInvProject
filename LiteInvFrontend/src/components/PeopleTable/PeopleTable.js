@@ -28,9 +28,9 @@ const useStyles = makeStyles(styles);
 export default function CustomTable(props) {
   const classes = useStyles();
   const history = useHistory()
-  const { type, tableHeaderColor, retrieveUrl, deleteUrl, updateUrl } = props;
+  const { type, summaries, tableHeaderColor, retrieveUrl, deleteUrl, updateUrl } = props;
 
-  const [data, setData] = useState([{[`${type}Id`]: "Loading...", [`${type}Name`]: "Loading...", [`${type}Email`]: "Loading..."}]);
+  const [data, setData] = useState([{[`${type} Id`]: "Loading..."}]);
   const [id, setId] = useState(-1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -60,6 +60,11 @@ export default function CustomTable(props) {
             <TableCell className={classes.tableCell}>
               <b>{`${type} Email`}</b>
             </TableCell>
+            {summaries.map((summary, key) => {
+              return (<TableCell className={classes.tableCell}>
+                <b>{summary}</b>
+              </TableCell>)
+            })}
             <TableCell className={classes.tableCell} />
           </TableRow>
         </TableHead>
@@ -68,21 +73,26 @@ export default function CustomTable(props) {
             return (
               <TableRow key={key} className={classes.tableBodyRow}>
                 <TableCell className={classes.tableCell}>
-                  {prop[`${type}Id`]}
+                  {prop[`${type} Id`]}
                 </TableCell>
                 <TableCell className={classes.tableCell}>
-                {prop[`${type}Name`]}
+                {prop[`${type} Name`]}
                 </TableCell>
                 <TableCell className={classes.tableCell}>
-                {prop[`${type}Email`]}
+                {prop[`${type} Email`]}
                 </TableCell>
+                {summaries.map((summary, key) => {
+                  return (<TableCell className={classes.tableCell}>
+                    <b>{prop[summary]}</b>
+                  </TableCell>)
+                })}
                 <TableCell className={classes.tableCell}>
                   <Button
                     className={classes.Button}
                     onClick={() => {
-                      setId(prop[`${type}Id`]);
-                      setName(prop[`${type}Name`]);
-                      setEmail(prop[`${type}Email`]);
+                      setId(prop[`${type} Id`]);
+                      setName(prop[`${type} Name`]);
+                      setEmail(prop[`${type} Email`]);
                       setOpen(true);
                     }}
                   >
@@ -91,18 +101,20 @@ export default function CustomTable(props) {
                   <Button
                     className={classes.Button}
                     onClick={async () => {
-                      let toDelete = window.confirm(`Do you want to delete ${prop[`${type}Name`]} (Id: ${prop[`${type}Id`]}, Email: ${prop[`${type}Email`]})?`)
+                      let toDelete = window.confirm(`Do you want to delete ${prop[`${type} Name`]} (Id: ${prop[`${type} Id`]}, Email: ${prop[`${type} Email`]})?`)
                       if (toDelete) {
-                        let result = await axios(deleteUrl, {
-                          params: {
-                            [`${type.toLowerCase()}_id`]: prop[`${type}Id`]
+                        try {
+                          let result = await axios(deleteUrl, {
+                            params: {
+                              [`${type.toLowerCase()}_id`]: prop[`${type} Id`]
+                            }
+                          });
+                          if (result.status === 200) {
+                            alert(`${type} ${prop[`${type} Name`]} (Id: ${prop[`${type} Id`]}, Email: ${prop[`${type} Email`]}) is successfully deleted`);
+                            history.go(0);
                           }
-                        });
-                        if (result.status === 200) {
-                          alert(`${type} ${prop[`${type}Name`]} (Id: ${prop[`${type}Id`]}, Email: ${prop[`${type}Email`]}) is successfully deleted`);
-                          history.go(0);
-                        } else {
-                          alert("Delete Fail");
+                        } catch (error) {
+                          alert(`${error.response.data[0]["Error Message"]}`)
                         }
                       }
                     }}
@@ -165,8 +177,8 @@ export default function CustomTable(props) {
                 alert(`${type} ${name} (Id: ${id}, Email: ${email}) is succesfully updated`)
                 history.go(0);
               } 
-            } catch {
-              alert("Update fail");
+            } catch (error) {
+              alert(`${error.response.data[0]["Error Message"]}`)
             }
           }}
           color="primary">

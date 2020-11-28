@@ -9,7 +9,7 @@ import Table from "components/Table/Table.js"
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import Chip from "@material-ui/core/Chip";
+import ItemsForm from "components/ItemsForm/ItemsForm.js"
 
 const styles = {
   cardCategoryWhite: {
@@ -60,28 +60,12 @@ export default function Inventory() {
               tableHeaderColor="primary"
               tableHead={["Item Id", "Name", "Count", "Tag"]}
               tableData={[
-                {id: 1, name: "Paper", count: 25, tag: [{id: 3, name: "Stationary"}, {id: 1, name: "Non-durable"}]},
-                {id: 2, name: "Keyboard", count: 3, tag: [{id: 4, name: "Computer"}, {id: 2, name: "Durable"}]},
-                {id: 3, name: "Box", count: 8, tag: [{id: 5, name: "Package"}, {id: 1, name: "Non-durable"}]}
+                {id: 1, name: "Paper", count: 25},
+                {id: 2, name: "Keyboard", count: 3},
+                {id: 3, name: "Box", count: 8}
               ]}
             />
-          </CardBody>
-        </Card>
-      </GridItem>
-      <GridItem xs={12} sm={12} md={12}>
-        <Card plain>
-          <CardHeader plain color="primary">
-            <h4 className={classes.cardTitleWhite}>
-              <b>Tag</b>
-            </h4>
-            <p className={classes.cardCategoryWhite}>
-              Categories of items
-            </p>
-          </CardHeader>
-          <CardBody>
-            {["Non-durable", "Durable", "Stationary", "Computer", "Package"].map((prop, key) => {
-              return <Chip label={prop} variant="outlined" style={{margin: "5px"}}/>
-            })}
+            <ItemsForm />
           </CardBody>
         </Card>
       </GridItem>

@@ -43,25 +43,23 @@ const useStyles = makeStyles(styles);
 
 export default function PeopleCard(props) {
   const classes = useStyles();
-  const { title, summaries, type, createUrl, retrieveUrl, updateUrl, deleteUrl} = props;
+  const { title, type, createUrl, retrieveUrl, updateUrl} = props;
   return (
     <Card>
-      <CardHeader color="info">
+      <CardHeader color="warning">
         <h4 className={classes.cardTitleWhite}><b>{type}s</b></h4>
         <p className={classes.cardCategoryWhite}>
           {title}
         </p>
       </CardHeader>
       <CardBody>
-        <PeopleTable
+        <Table
           type={type}
-          summaries={summaries}
           tableHeaderColor="primary"
           retrieveUrl={retrieveUrl}
           updateUrl={updateUrl}
-          deleteUrl={deleteUrl}
         />
-        <PeopleForm
+        <TransactionsForm
           type={type}
           url={createUrl}
         />

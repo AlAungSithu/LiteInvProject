@@ -7,7 +7,9 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
-import Chip from "@material-ui/core/Chip";
+import Button from "@material-ui/core/Button"
+import Edit from "@material-ui/icons/Edit"
+import Delete from "@material-ui/icons/Delete";
 // core components
 import styles from "assets/jss/material-dashboard-react/components/tableStyle.js";
 
@@ -32,7 +34,6 @@ export default function CustomTable(props) {
                 Count
               </TableCell>
               <TableCell className={classes.tableCell + " " + classes.tableHeadCell}>
-                Tag
               </TableCell>
             </TableRow>
           </TableHead>
@@ -50,10 +51,13 @@ export default function CustomTable(props) {
                 <TableCell className={classes.tableCell}>
                   {prop.count}
                 </TableCell>
-                <TableCell className={classes.tableCell}>
-                  {prop.tag.map((prop, key) => {
-                    return <Chip label={prop.name} variant="outlined" style={{margin: "5px"}}/>
-                  })}
+                <TableCell>
+                  <Button>
+                    <Edit />
+                  </Button>
+                  <Button>
+                    <Delete />
+                  </Button>
                 </TableCell>
               </TableRow>
             );

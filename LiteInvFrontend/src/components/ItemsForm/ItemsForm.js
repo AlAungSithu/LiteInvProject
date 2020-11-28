@@ -7,7 +7,7 @@ import Button from "components/CustomButtons/Button";
 import axios from "axios";
 import { useHistory } from "react-router";
 
-export default function PeopleForm(props) {
+export default function ItemsForm(props) {
   const { url, type } = props;
   const history = useHistory();
   const [name, setName] = useState("");
@@ -20,24 +20,21 @@ export default function PeopleForm(props) {
           alert("Please input name and email");
           return;
         }
-        try {
-          let result = await axios(url, {
-            params: {
-              [`${type.toLowerCase()}_name`]: name,
-              [`${type.toLowerCase()}_email`]: email
-            }
-          });
-          if (result.status === 201) {
-            alert(`${type} ${result.data[0][`${type} Name`]} (Id: ${result.data[0][`${type} Id`]}, Email: ${result.data[0][`${type} Email`]}) is successfully created`);
-            history.go(0)
+        let result = await axios(url, {
+          params: {
+            [`item_name`]: name
           }
-        } catch (error) {
-          alert(`${error.response.data[0]["Error Message"]}`)
+        });
+        if (result.data[0].Success) {
+          alert(`${type} ${result.data[0][`${type}Name`]} (Id: ${result.data[0][`${type}Id`]}, Email: ${result.data[0][`${type}Email`]}) is successfully created`);
+          history.go(0)
+        } else {
+          alert(`Error, ${type} cannot be created`)
         }
       }}
     >
       <Input
-        labelText={`${type} Name`}
+        labelText={`Item Name`}
         inputProps = {{
           "value": name,
           "onChange": e => setName(e.target.value)
@@ -46,21 +43,11 @@ export default function PeopleForm(props) {
           fullWidth: true
         }}
       />
-      <Input
-        labelText={`${type} Email`}
-        inputProps = {{
-          "value": email,
-          "onChange": e => setEmail(e.target.value)
-        }}
-        formControlProps={{
-          fullWidth: true
-        }}
-      />
       <Button
-        color="info"
+        color="rose"
         type="submit"
       >
-        Add {`${type}`}
+        Add Item
       </Button>
     </form>
   );

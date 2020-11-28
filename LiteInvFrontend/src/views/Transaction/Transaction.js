@@ -1,13 +1,14 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
+
 // core components
-import GridItem from "components/Grid/GridItem.js";
-import GridContainer from "components/Grid/GridContainer.js";
 import Table from "components/Table/Table.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
+import CustomTabs from "components/CustomTabs/CustomTabs.js";
+import TransactionsForm from "components/TransactionsForm/TransactionsForm";
 
 const styles = {
   cardCategoryWhite: {
@@ -44,64 +45,80 @@ const useStyles = makeStyles(styles);
 export default function TableList() {
   const classes = useStyles();
   return (
-    <GridContainer>
-      <GridItem xs={12} sm={12} md={12}>
-        <Card>
-          <CardHeader color="warning">
-            <h4 className={classes.cardTitleWhite}><b>Employee Purchase</b></h4>
-            <p className={classes.cardCategoryWhite}>
-              Buy items from seller to fill the stock
-            </p>
-          </CardHeader>
-          <CardBody>
-            <Table
-              tableHeaderColor="primary"
-              tableHead={["Purchase Id", "Item Id", "Item Name", "Employee Id", "Employee Name", "Seller Id", "Seller Name", "Amount", "Purchase Date"]}
-              tableData={[
-                [1, 1, "Paper", 1, "Adam Thomas", 2, "Mary Rock", 25, "09/30/2020"]
-              ]}
-            />
-          </CardBody>
-        </Card>
-      </GridItem>
-      <GridItem xs={12} sm={12} md={12}>
-        <Card>
-          <CardHeader color="warning">
-            <h4 className={classes.cardTitleWhite}><b>Customer Order</b></h4>
-            <p className={classes.cardCategoryWhite}>
-              Customer purchases item from stock
-            </p>
-          </CardHeader>
-          <CardBody>
-            <Table
-              tableHeaderColor="primary"
-              tableHead={["Order Id", "Item Id", "Item Name", "Employee Id", "Employee Name", "Customer Id", "Customer Name", "Amount", "Purchase Date"]}
-              tableData={[
-                [1, 1, "Paper", 1, "Adam Thomas", 2, "Mary Rock", 25, "09/30/2020"]
-              ]}
-            />
-          </CardBody>
-        </Card>
-      </GridItem>
-      <GridItem xs={12} sm={12} md={12}>
-        <Card>
-          <CardHeader color="warning">
-            <h4 className={classes.cardTitleWhite}><b>Customer Refund</b></h4>
-            <p className={classes.cardCategoryWhite}>
-              Customer refunds back to stock
-            </p>
-          </CardHeader>
-          <CardBody>
-            <Table
-              tableHeaderColor="primary"
-              tableHead={["Refund Id", "Item Id", "Item Name", "Employee Id", "Employee Name", "Customer Id", "Customer Name", "Amount", "Purchase Date"]}
-              tableData={[
-                [1, 1, "Paper", 1, "Adam Thomas", 2, "Mary Rock", 25, "09/30/2020"]
-              ]}
-            />
-          </CardBody>
-        </Card>
-      </GridItem>
-    </GridContainer>
+    <CustomTabs
+      title=""
+      headerColor="rose"
+      tabs={[
+        {
+          tabName: "Employee Purchases",
+          tabContent: (
+            <Card>
+              <CardHeader color="warning">
+                <h4 className={classes.cardTitleWhite}><b>Employee Purchase</b></h4>
+                <p className={classes.cardCategoryWhite}>
+                  Buy items from seller to fill the stock
+                </p>
+              </CardHeader>
+              <CardBody>
+                <Table
+                  tableHeaderColor="primary"
+                  tableHead={["Purchase Id", "Item Id", "Item Name", "Employee Id", "Employee Name", "Seller Id", "Seller Name", "Amount", "Purchase Date"]}
+                  tableData={[
+                    [1, 1, "Paper", 1, "Adam Thomas", 2, "Mary Rock", 25, "09/30/2020"]
+                  ]}
+                />
+                <TransactionsForm
+                  type = "Employee Purchase"
+                />       
+              </CardBody>
+            </Card>
+          )
+        },
+        {
+          tabName: "Customer Orders",
+          tabContent: (
+            <Card>
+              <CardHeader color="warning">
+                <h4 className={classes.cardTitleWhite}><b>Customer Order</b></h4>
+                <p className={classes.cardCategoryWhite}>
+                  Customer purchases item from stock
+                </p>
+              </CardHeader>
+              <CardBody>
+                <Table
+                  tableHeaderColor="primary"
+                  tableHead={["Order Id", "Item Id", "Item Name", "Employee Id", "Employee Name", "Customer Id", "Customer Name", "Amount", "Purchase Date"]}
+                  tableData={[
+                    [1, 1, "Paper", 1, "Adam Thomas", 2, "Mary Rock", 25, "09/30/2020"]
+                  ]}
+                />
+              </CardBody>
+            </Card>
+          )
+        },
+        {
+          tabName: "Customer Refunds",
+          tabContent: (
+            <Card>
+              <CardHeader color="warning">
+                <h4 className={classes.cardTitleWhite}><b>Customer Refund</b></h4>
+                <p className={classes.cardCategoryWhite}>
+                  Customer refunds back to stock
+                </p>
+              </CardHeader>
+              <CardBody>
+                <Table
+                  tableHeaderColor="primary"
+                  tableHead={["Refund Id", "Item Id", "Item Name", "Employee Id", "Employee Name", "Customer Id", "Customer Name", "Amount", "Purchase Date"]}
+                  tableData={[
+                    [1, 1, "Paper", 1, "Adam Thomas", 2, "Mary Rock", 25, "09/30/2020"]
+                  ]}
+                />
+              </CardBody>
+            </Card>
+          )
+        }
+      ]}
+    />
   );
 }
