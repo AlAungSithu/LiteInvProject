@@ -83,7 +83,7 @@ export default function CustomTable(props) {
                 </TableCell>
                 {summaries.map((summary, key) => {
                   return (<TableCell className={classes.tableCell}>
-                    <b>{prop[summary]}</b>
+                    {prop[summary]}
                   </TableCell>)
                 })}
                 <TableCell className={classes.tableCell}>

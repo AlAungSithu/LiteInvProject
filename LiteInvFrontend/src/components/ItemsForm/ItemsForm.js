@@ -8,28 +8,29 @@ import axios from "axios";
 import { useHistory } from "react-router";
 
 export default function ItemsForm(props) {
-  const { url, type } = props;
-  const history = useHistory();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const { url } = props
+  const history = useHistory()
+  const [name, setName] = useState("")
   return (
     <form
       onSubmit={async (e) => {
         e.preventDefault();
-        if (!(name && email)) {
-          alert("Please input name and email");
+        if (!(name)) {
+          alert("Please input item name");
           return;
         }
-        let result = await axios(url, {
-          params: {
-            [`item_name`]: name
+        try {
+          let result = await axios(url, {
+            params: {
+              item_name: name
+            }
+          });
+          if (result.status === 201) {
+            alert(`${result.data[0][`Item Name`]} (Id: ${result.data[0][`Item Id`]}) is successfully created`);
+            history.go(0)
           }
-        });
-        if (result.data[0].Success) {
-          alert(`${type} ${result.data[0][`${type}Name`]} (Id: ${result.data[0][`${type}Id`]}, Email: ${result.data[0][`${type}Email`]}) is successfully created`);
-          history.go(0)
-        } else {
-          alert(`Error, ${type} cannot be created`)
+        } catch (error) {
+          alert(`${error.response.data[0]["Error Message"]}`)
         }
       }}
     >

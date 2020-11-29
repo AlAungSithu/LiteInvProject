@@ -28,7 +28,7 @@ const dashboardRoutes = [
     component: People
   },
   {
-    path: "/table",
+    path: "/inventory",
     name: "Inventory",
     icon: "widgets",
     component: Inventory

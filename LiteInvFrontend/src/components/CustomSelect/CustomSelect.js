@@ -33,11 +33,6 @@ export default function CustomInput(props) {
     [" " + classes.labelRootError]: error,
     [" " + classes.labelRootSuccess]: success && !error
   });
-  const underlineClasses = classNames({
-    [classes.underlineError]: error,
-    [classes.underlineSuccess]: success && !error,
-    [classes.underline]: true
-  });
   const marginTop = classNames({
     [classes.marginTop]: labelText === undefined
   });
@@ -58,17 +53,17 @@ export default function CustomInput(props) {
       <Select
         classes={{
           root: marginTop,
-          disabled: classes.disabled,
-          underline: underlineClasses
+          disabled: classes.disabled
         }}
-        id={id}
+        key={id}
         {...inputProps}
       >
         {items.map(prop => 
           <MenuItem
-            value={prop.id}
+            value={prop.value}
+            key={prop.key}
           >
-            {prop.id}: {prop.value}
+            {prop.label}
           </MenuItem>
         )}
       </Select>
