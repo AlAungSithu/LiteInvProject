@@ -29,11 +29,11 @@ const Seller = sequelize.define('Seller', {
         }
     }
     ,
-{
-    tableName: 'Seller',
-    createdAt: false,
-    updatedAt: false
-});
+    {
+        tableName: 'Seller',
+        createdAt: false,
+        updatedAt: false
+    });
 //CUSTOMER model
 const Customer = sequelize.define('Customer', {
         CustomerId: {
@@ -155,30 +155,35 @@ exports.update_seller = functions.https.onRequest(async (request, response) => {
         let id = request.query.seller_id;
         let new_name = request.query.seller_name;
         let new_email = request.query.seller_email;
-        let sql;
-        let preparedVariables;
         if (new_name && new_email) {
-            sql = `UPDATE Seller SET SellerName = ?, SellerEmail = ? WHERE SellerId = ?;`
-            preparedVariables = [new_name, new_email, id];
+            Seller.update(
+                {SellerName: new_name, SellerEmail: new_email},{where: {SellerId: id}})
+                .then(function(seller) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Seller."}]);
+            });
         } else if (new_name) {
-            sql = `UPDATE Seller SET SellerName = ? WHERE SellerId = ?;`
-            preparedVariables = [new_name, id];
+            Seller.update(
+                {SellerName: new_name},{where: {SellerId: id}})
+                .then(function(seller) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Seller."}]);
+            });
         } else if (new_email) {
-            sql = `UPDATE Seller SET SellerEmail = ? WHERE SellerId = ?;`
-            preparedVariables = [new_email, id];
+            Seller.update(
+                {SellerEmail: new_email},{where: {SellerId: id}})
+                .then(function(seller) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Seller."}]);
+            });
         } else {
             // Neither input
             response.status(400).send([{"Error Message" : "Please enter a new name or email!"}]);
             return;
         }
-
-        con.query(sql, preparedVariables, (err, rows, fields) => {
-            if (!err) {
-                response.sendStatus(200);
-            } else {
-                response.status(400).send([{"Error Message" : "Failed to update Seller."}]);
-            }
-        })
 
     })
 });
@@ -298,30 +303,35 @@ exports.update_employee = functions.https.onRequest(async (request, response) =>
         let id = request.query.employee_id;
         let new_name = request.query.employee_name;
         let new_email = request.query.employee_email;
-        let sql;
-        let preparedVariables;
         if (new_name && new_email) {
-            sql = `UPDATE Employee SET EmployeeName = ?, EmployeeEmail = ? WHERE EmployeeId = ?;`
-            preparedVariables = [new_name, new_email, id];
+            Employee.update(
+                {EmployeeName: new_name, EmployeeEmail: new_email},{where: {EmployeeId: id}})
+                .then(function(employee) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Employee."}]);
+            });
         } else if (new_name) {
-            sql = `UPDATE Employee SET EmployeeName = ? WHERE EmployeeId = ?;`
-            preparedVariables = [new_name, id];
+            Employee.update(
+                {EmployeeName: new_name},{where: {EmployeeId: id}})
+                .then(function(employee) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Employee."}]);
+            });
         } else if (new_email) {
-            sql = `UPDATE Employee SET EmployeeEmail = ? WHERE EmployeeId = ?;`
-            preparedVariables = [new_email, id];
+            Employee.update(
+                {EmployeeEmail: new_email},{where: {EmployeeId: id}})
+                .then(function(employee) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Employee."}]);
+            });
         } else {
             // Neither input
             response.status(400).send([{"Error Message" : "Please enter a new name or email!"}]);
             return;
         }
-
-        con.query(sql, preparedVariables, (err, rows, fields) => {
-            if (!err) {
-                response.sendStatus(200);
-            } else {
-                response.status(400).send([{"Error Message" : "Failed to update Employee."}]);
-            }
-        })
 
     })
 });
@@ -424,30 +434,35 @@ exports.update_customer = functions.https.onRequest(async (request, response) =>
         let id = request.query.customer_id;
         let new_name = request.query.customer_name;
         let new_email = request.query.customer_email;
-        let sql;
-        let preparedVariables;
         if (new_name && new_email) {
-            sql = `UPDATE Customer SET CustomerName = ?, CustomerEmail = ? WHERE CustomerId = ?;`
-            preparedVariables = [new_name, new_email, id];
+            Customer.update(
+                {CustomerName: new_name, CustomerEmail: new_email},{where: {CustomerId: id}})
+                .then(function(customer) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Customer."}]);
+            });
         } else if (new_name) {
-            sql = `UPDATE Customer SET CustomerName = ? WHERE CustomerId = ?;`
-            preparedVariables = [new_name, id];
+            Customer.update(
+                {CustomerName: new_name},{where: {CustomerId: id}})
+                .then(function(customer) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Customer."}]);
+            });
         } else if (new_email) {
-            sql = `UPDATE Customer SET CustomerEmail = ? WHERE CustomerId = ?;`
-            preparedVariables = [new_email, id];
+            Customer.update(
+                {CustomerEmail: new_email},{where: {CustomerId: id}})
+                .then(function(customer) {
+                    response.sendStatus(200);
+                }).catch (function (e) {
+                response.status(400).send([{"Error Message" : "Failed to update Customer."}]);
+            });
         } else {
             // Neither input
             response.status(400).send([{"Error Message" : "Please enter a new name or email!"}]);
             return;
         }
-
-        con.query(sql, preparedVariables, (err, rows, fields) => {
-            if (!err) {
-                response.sendStatus(200);
-            } else {
-                response.status(400).send([{"Error Message" : "Failed to update Customer."}]);
-            }
-        })
 
     })
 });
