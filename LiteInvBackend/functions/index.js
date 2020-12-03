@@ -6,6 +6,80 @@ const cors = require('cors')({origin: true});
 // const { extractInstanceAndPath } = require('firebase-functions/lib/providers/database');
 var admin = require('firebase-admin');
 const con = require('./mysql')
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = new Sequelize('LiteInv', 'admin', '256Team256', {
+    host: 'liteinv.cwbgzf4cyva5.us-east-2.rds.amazonaws.com',
+    dialect: 'mysql'
+});
+//SELLER model
+const Seller = sequelize.define('Seller', {
+        SellerId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        SellerName: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        SellerEmail: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
+    }
+    ,
+{
+    tableName: 'Seller',
+    createdAt: false,
+    updatedAt: false
+});
+//CUSTOMER model
+const Customer = sequelize.define('Customer', {
+        CustomerId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        CustomerName: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        CustomerEmail: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
+    }
+    ,
+    {
+        tableName: 'Customer',
+        createdAt: false,
+        updatedAt: false
+    });
+//EMPLOYEE model
+const Employee = sequelize.define('Employee', {
+        EmployeeId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        EmployeeName: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        EmployeeEmail: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
+    }
+    ,
+    {
+        tableName: 'Employee',
+        createdAt: false,
+        updatedAt: false
+    });
 admin.initializeApp();
 
 // // Create and Deploy Your First Cloud Functions
@@ -19,24 +93,33 @@ admin.initializeApp();
 // SELLER FUNCTIONS
 exports.create_seller = functions.https.onRequest(async (request, response) => {
     cors(request, response, () => {
-    
         let name = request.query.seller_name;
         let email = request.query.seller_email;
         res = [];
 
-        con.query("INSERT INTO Seller (SellerName, SellerEmail) VALUES (?, ?);", [name, email], (err, rows, fields) => {
-            if (!err) {
-                res.push({ "Seller Id": rows.insertId, "Seller Name": name, "Seller Email": email });
+        sequelize.models.Seller.create({
+            SellerName: name,
+            SellerEmail: email
+        }).then(function(seller) {
+            Seller.findOne({attributes: ['SellerId'], where: {SellerEmail: email}}).then(sellerId => {
+                res.push({ "Seller Id": sellerId.SellerId, "Seller Name": name, "Seller Email": email });
                 response.status(201).send(res);
-            } else {
-                response.status(400).send([{"Error Message" : "Failed to create Seller."}]);
-            }
-        })
+            })
+            //const returnId = sequelize.models.Seller.max('SellerId');
+        }).catch (function (e) {
+            response.status(400).send([{"Error Message" : "Failed to create Seller."}]);
+        });
 
     })
 });
 
 exports.retrieve_seller = functions.https.onRequest(async (request, response) => {
+    try {
+        await sequelize.authenticate();
+        console.log('Connection has been established successfully.');
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
     cors(request, response, () => {
     
         let id = request.query.seller_id;
@@ -107,17 +190,21 @@ exports.delete_seller = functions.https.onRequest(async (request, response) => {
         let id = request.query.seller_id;
 
         if (!id) {
-            response.status(400).send([{"Error Message" : `Please enter a Seller Id!`}]);
+            response.status(400).send([{"Error Message" : `Please HI enter a Seller Id!`}]);
             return;
         }
-        
-        con.query(`DELETE FROM Seller WHERE SellerId = ?`, [id], (err, rows, fields) => {
-            if (!err) {
-                response.sendStatus(200);
-            } else {
-                response.status(400).send([{"Error Message" : `Cannot delete Seller ${id} because there are Transactions that include this seller.`}]);
+
+        Seller.destroy({
+            where: {
+                SellerId: id
             }
+
+        }).then(function(seller) {
+            response.sendStatus(200);
+        }).catch(function (e) {
+            response.status(400).send([{"Error Message" : `Cannot delete Seller ${id} because there are Transactions that include this seller.`}]);
         })
+
     })
     
 });
@@ -131,14 +218,17 @@ exports.create_employee = functions.https.onRequest(async (request, response) =>
         let email = request.query.employee_email;
         res = [];
 
-        con.query(`INSERT INTO Employee (EmployeeName, EmployeeEmail) VALUES (?, ?);`, [name, email], (err, rows, fields) => {
-            if (!err) {
-                res.push({ "Employee Id": rows.insertId, "Employee Name": name, "Employee Email": email });
+        sequelize.models.Employee.create({
+            EmployeeName: name,
+            EmployeeEmail: email
+        }).then(function(employee) {
+            Employee.findOne({attributes: ['EmployeeId'], where: {EmployeeEmail: email}}).then(employeeId => {
+                res.push({ "Employee Id": employeeId.EmployeeId, "Employee Name": name, "Employee Email": email });
                 response.status(201).send(res);
-            } else {
-                response.status(400).send([{"Error Message" : "Failed to create Employee."}]);
-            }
-        })
+            })
+        }).catch (function (e) {
+            response.status(400).send([{"Error Message" : "Failed to create Employee."}]);
+        });
 
     })
 });
@@ -245,13 +335,16 @@ exports.delete_employee = functions.https.onRequest(async (request, response) =>
             response.status(400).send([{"Error Message" : `Please enter an Employee Id!`}]);
             return;
         }
-        
-        con.query(`DELETE FROM Employee WHERE EmployeeId = ?`, [id], (err, rows, fields) => {
-            if (!err) {
-                response.sendStatus(200);
-            } else {
-                response.status(400).send([{"Error Message" : `Cannot delete Employee ${id} because there are Transactions that include this employee.`}]);
+
+        Employee.destroy({
+            where: {
+                EmployeeId: id
             }
+
+        }).then(function(employee) {
+            response.sendStatus(200);
+        }).catch(function (e) {
+            response.status(400).send([{"Error Message" : `Cannot delete Employee ${id} because there are Transactions that include this employee.`}]);
         })
     })
     
@@ -265,14 +358,17 @@ exports.create_customer = functions.https.onRequest(async (request, response) =>
         let email = request.query.customer_email;
         res = [];
 
-        con.query("INSERT INTO Customer (CustomerName, CustomerEmail) VALUES (?, ?);", [name, email], (err, rows, fields) => {
-            if (!err) {
-                res.push({ "Customer Id": rows.insertId, "Customer Name": name, "Customer Email": email });
+        sequelize.models.Customer.create({
+            CustomerName: name,
+            CustomerEmail: email
+        }).then(function(customer) {
+            Customer.findOne({attributes: ['CustomerId'], where: {CustomerEmail: email}}).then(customerId => {
+                res.push({ "Customer Id": customerId.CustomerId, "Customer Name": name, "Customer Email": email });
                 response.status(201).send(res);
-            } else {
-                response.status(400).send([{"Error Message" : "Failed to create Customer."}]);
-            }
-        })
+            })
+        }).catch (function (e) {
+            response.status(400).send([{"Error Message" : "Failed to create Customer."}]);
+        });
 
     })
 });
@@ -365,14 +461,17 @@ exports.delete_customer = functions.https.onRequest(async (request, response) =>
             response.status(400).send([{"Error Message" : `Please enter a Customer Id!`}]);
             return;
         }
-        
-        con.query(`DELETE FROM Customer WHERE CustomerId = ?`, [id], (err, rows, fields) => {
-            if (!err) {
-                response.sendStatus(200);
-            } else {
-                response.status(400).send([{"Error Message" : `Cannot delete Customer ${id} because there are Transactions that include this customer.`}]);
+        Customer.destroy({
+            where: {
+                CustomerId: id
             }
+
+        }).then(function(customer) {
+            response.sendStatus(200);
+        }).catch(function (e) {
+            response.status(400).send([{"Error Message" : `Cannot delete Customer ${id} because there are Transactions that include this customer.`}]);
         })
+
     })
     
 });
