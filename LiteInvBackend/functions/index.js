@@ -114,12 +114,6 @@ exports.create_seller = functions.https.onRequest(async (request, response) => {
 });
 
 exports.retrieve_seller = functions.https.onRequest(async (request, response) => {
-    try {
-        await sequelize.authenticate();
-        console.log('Connection has been established successfully.');
-    } catch (error) {
-        console.error('Unable to connect to the database:', error);
-    }
     cors(request, response, () => {
     
         let id = request.query.seller_id;
