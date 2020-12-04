@@ -54,7 +54,7 @@ exports.create_purchase = functions.https.onRequest(async (request, response) =>
                                     con.query("ROLLBACK;");
 
                                 }
-                                let wholeDate = rows3[0]['Purchase Date'].toLocaleString().substring(0, 10);
+                                let wholeDate = rows3[0]['Purchase Date'].toLocaleString().substring(0, 9);
                                 rows3[0]['Purchase Date'] = wholeDate;
                                 response.status(201).send(rows3);
                                 con.query("COMMIT;");
@@ -109,7 +109,7 @@ exports.retrieve_purchase = functions.https.onRequest(async (request, response) 
             if (!err) {
                 let i = 0;
                 while (i < rows.length) {
-                    let wholeDate = rows[i]['Purchase Date'].toLocaleString().substring(0, 10);
+                    let wholeDate = rows[i]['Purchase Date'].toLocaleString().substring(0, 9);
                     rows[i]['Purchase Date'] = wholeDate;
                     i++;
                 }
@@ -193,7 +193,7 @@ exports.create_order = functions.https.onRequest(async (request, response) => {
                                                 con.query("ROLLBACK;");
 
                                             } else {
-                                                let wholeDate = rows4[0]['Order Date'].toLocaleString().substring(0, 10);
+                                                let wholeDate = rows4[0]['Order Date'].toLocaleString().substring(0, 9);
                                                 rows4[0]['Order Date'] = wholeDate;
                                                 response.status(201).send(rows4);
                                                 con.query("COMMIT;");
@@ -249,7 +249,7 @@ exports.retrieve_order = functions.https.onRequest(async (request, response) => 
             if (!err) {
                 let i = 0;
                 while (i < rows.length) {
-                    let wholeDate = rows[i]['Order Date'].toLocaleString().substring(0, 10);
+                    let wholeDate = rows[i]['Order Date'].toLocaleString().substring(0, 9);
                     rows[i]['Order Date'] = wholeDate;
                     i++;
                 }
@@ -353,7 +353,7 @@ exports.create_refund = functions.https.onRequest(async (request, response) => {
                                                 con.query("ROLLBACK;");
 
                                             } else {
-                                                let wholeDate = rows4[0]['Refund Date'].toLocaleString().substring(0, 10);
+                                                let wholeDate = rows4[0]['Refund Date'].toLocaleString().substring(0, 9);
                                                 rows4[0]['Refund Date'] = wholeDate;
                                                 response.status(201).send(rows4);
                                                 con.query("COMMIT;");
@@ -410,7 +410,7 @@ exports.retrieve_refund = functions.https.onRequest(async (request, response) =>
             if (!err) {
                 let i = 0;
                 while (i < rows.length) {
-                    let wholeDate = rows[i]['Refund Date'].toLocaleString().substring(0, 10);
+                    let wholeDate = rows[i]['Refund Date'].toLocaleString().substring(0, 9);
                     rows[i]['Refund Date'] = wholeDate;
                     i++;
                 }

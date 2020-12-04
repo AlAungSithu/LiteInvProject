@@ -131,7 +131,7 @@ exports.retrieve_history = functions.https.onRequest(async (request, response) =
                 
                 let i = 0;
                 while (i < rows.length) {
-                    let wholeDate = (rows[i].Date).toLocaleString().substring(0, 10);
+                    let wholeDate = (rows[i].Date).toLocaleString().substring(0, 9);
                     rows[i].Date = wholeDate;
                     i++;
                 }

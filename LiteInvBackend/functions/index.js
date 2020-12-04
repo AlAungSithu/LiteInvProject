@@ -189,7 +189,7 @@ exports.delete_seller = functions.https.onRequest(async (request, response) => {
         let id = request.query.seller_id;
 
         if (!id) {
-            response.status(400).send([{"Error Message" : `Please HI enter a Seller Id!`}]);
+            response.status(400).send([{"Error Message" : `Please enter a Seller Id!`}]);
             return;
         }
 
